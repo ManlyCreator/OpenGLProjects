@@ -6,9 +6,7 @@
 #define WIDTH 800
 #define HEIGHT 600
 #define BUF_SIZE 512
-
-// TODO: Create a GitHub repo that ignores all build directories
-// TODO: Hello Window - Element Buffer Objects ; Render two separate triangles using EBOs
+#define WIREFRAME_MODE 0
 
 void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods);
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
@@ -16,12 +14,19 @@ int shaderCompilationSuccess(unsigned shader);
 int programLinkSuccess(unsigned program);
 
 int main(void) {
-  unsigned VBO, VAO;
+  unsigned VBO, EBO, VAO;
   unsigned vertexShader, fragmentShader, shaderProgram;
   float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f
+    -1.0f, -0.5f, 0.0f,
+    -0.5f,  0.5f, 0.0f,
+     0.0f, -0.5f, 0.0f,
+     0.5f,  0.5f, 0.0f,
+     1.0f, -0.5f, 0.0f
+  };
+  unsigned indices[] = {
+    0, 1, 2,
+    2, 3, 4,
+    1, 2, 3
   };
   const char *vertexShaderSource = 
     "#version 330 core\n"
@@ -62,10 +67,15 @@ int main(void) {
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
-  // Vertex Buffer
+  // Vertex Buffer Object
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  // Element Buffer Object
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   // Setting Vertex Array Data
   glEnableVertexAttribArray(0);
@@ -100,6 +110,11 @@ int main(void) {
   glfwSetKeyCallback(window, keyCallback); 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
+  // Enables Wireframe Rendering
+#if WIREFRAME_MODE
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+#endif
+
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
     // Process Input
@@ -107,7 +122,7 @@ int main(void) {
     // Render Commands
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT); 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, sizeof(vertices) / sizeof(vertices[0]), GL_UNSIGNED_INT, (void *)0);
 
     // Poll Events & Swap Buffers
     glfwPollEvents();
