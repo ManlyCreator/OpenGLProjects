@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(HelloTriangleExcercises)
+project(Excercises)
 
 add_executable(Excercises main.c)
 
