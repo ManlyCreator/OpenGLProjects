@@ -11,6 +11,9 @@
 // External Libraries
 #include <shader.h>
 
+/*** EXCERCISE QUESTION ***/
+// The left side is always black because it oscillates between -1 & 0, which produces black.
+
 #define WIDTH 800
 #define HEIGHT 600
 #define BUF_SIZE 512
