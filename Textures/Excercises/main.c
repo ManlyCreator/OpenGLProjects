@@ -13,30 +13,30 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-// TODO: Textures - Texture Units
-// TODO: Set up a project that renders an untextured rectangle and contains the corresponding texture files.
-//       Try to retexture the rectangle with nothing but OpenGL & stbi docs.
-
 #define WIDTH 800
 #define HEIGHT 600
 #define BUF_SIZE 512
+#define ALPHA_SPEED 1.0f
 #define WIREFRAME_MODE 0
 
-void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods);
+void processInput(GLFWwindow* window);
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 
+float alpha = 0.2f;
+float lastTime = 0, currentTime, deltaTime;
+
 int main(void) {
-  int width, height, nChannels;
+  int x, y, nrChannels;
   unsigned VBO, VAO, EBO;
-  unsigned texture;
+  unsigned textureObj;
   Shader shaderProgram;
   unsigned char *textureData;
   float vertices[] = {
     // Vertices         // Colors         // Texture Coordinates
     -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,           // Bottom-Left
-    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,           // Top-Left
-     0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,           // Bottom-Right
-     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f            // Top-Right
+    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f,           // Top-Left
+     0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 2.0f, 0.0f,           // Bottom-Right
+     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 2.0f, 2.0f            // Top-Right
   };
   int indices[] = {
     0, 1, 2,
@@ -89,25 +89,25 @@ int main(void) {
   // Texture Data
   stbi_set_flip_vertically_on_load(true);
 
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+  glGenTextures(1, &textureObj);
+  glBindTexture(GL_TEXTURE_2D, textureObj);
 
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   glActiveTexture(GL_TEXTURE0);
-  textureData = stbi_load("../Textures/container.jpg", &width, &height, &nChannels, 0);
+  textureData = stbi_load("../Textures/container.jpg", &x, &y, &nrChannels, 0);
   if (textureData) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
 
   glActiveTexture(GL_TEXTURE1);
-  textureData = stbi_load("../Textures/awesomeface.png", &width, &height, &nChannels, 0);
+  textureData = stbi_load("../Textures/awesomeface.png", &x, &y, &nrChannels, 0);
   if (textureData) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
 
@@ -122,9 +122,7 @@ int main(void) {
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 
-
   // Callbacks
-  glfwSetKeyCallback(window, keyCallback); 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
   // Enables Wireframe Rendering
@@ -134,12 +132,13 @@ int main(void) {
 
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
+    // Input
+    currentTime = glfwGetTime();
+    deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+    processInput(window);
+    shaderSetFloat(shaderProgram, "alpha", alpha);
     /*** RENDER COMMANDS ***/
-    // Transformations
-    // float xOffset = sin(glfwGetTime() * 4) / 2;
-    // float yOffset = cos(glfwGetTime() * 4) / 2;
-    // shaderSetFloat(shaderProgram, "xOffset", xOffset);
-    // shaderSetFloat(shaderProgram, "yOffset", yOffset);
     // Background Color
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT); 
@@ -152,8 +151,6 @@ int main(void) {
   }
 
   // Free Memory
-  stbi_image_free(textureData);
-
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO); glDeleteProgram(shaderProgram);
 
@@ -162,10 +159,15 @@ int main(void) {
   return 0;
 }
 
-void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+void processInput(GLFWwindow* window) {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
-  }
+
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    alpha = (alpha + (ALPHA_SPEED * deltaTime) > 1 ? 1 : alpha + (ALPHA_SPEED * deltaTime));
+
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    alpha = (alpha - (ALPHA_SPEED * deltaTime) < 0 ? 0 : alpha - (ALPHA_SPEED * deltaTime));
 }
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
