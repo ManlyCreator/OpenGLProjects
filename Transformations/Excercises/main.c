@@ -27,8 +27,6 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 float alpha = 0.2f;
 float lastTime = 0, currentTime, deltaTime;
 
-// TODO: Transformations - Excercises
-
 int main(void) {
   int x, y, nrChannels;
   unsigned VBO, VAO, EBO;
@@ -55,7 +53,7 @@ int main(void) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Window Creation
-  window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGLProject2", NULL, NULL);
+  window = glfwCreateWindow(WIDTH, HEIGHT, PROJECT_NAME_MACRO, NULL, NULL);
   if (!window) {
     printf("*** WINDOW CREATION FAILED ***\n");
     return -1;
@@ -134,8 +132,9 @@ int main(void) {
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif
 
+  double scale;
   unsigned transformLoc = glGetUniformLocation(shaderProgram, "transform");
-  mat4 trans;
+  mat4 trans1, trans2;
 
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
@@ -150,10 +149,18 @@ int main(void) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT); 
     // Draw
-    glm_mat4_identity(trans);
-    glm_rotate(trans, glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
-    glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float *)trans);
+    // First Container
+    glm_mat4_identity(trans1);
+    glm_translate(trans1, (vec3){0.5f, -0.5f, 0.0f});
+    glm_rotate(trans1, glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float *)trans1);
+    glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, NULL);
+    // Second Container
+    scale = sin(glfwGetTime());
+    glm_mat4_identity(trans2);
+    glm_translate(trans2, (vec3){-0.5f, 0.5f, 0.0f});
+    glm_scale(trans2, (vec3){scale, scale, scale});
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float *)trans2);
     glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, NULL);
 
     /*** POLL EVENTS & SWAP BUFFERS ***/
