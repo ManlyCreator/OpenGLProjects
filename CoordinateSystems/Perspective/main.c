@@ -27,6 +27,10 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 float alpha = 0.2f;
 float lastTime = 0, currentTime, deltaTime;
 
+// TODO: Render a cube
+// TODO: Rotate cube
+// TODO: Implement basic camera movement
+
 int main(void) {
   int x, y, nrChannels;
   unsigned VBO, VAO, EBO;
@@ -35,14 +39,22 @@ int main(void) {
   unsigned char *textureData;
   float vertices[] = {
     // Vertices         // Colors         // Texture Coordinates
-    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,           // Bottom-Left
-    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,           // Top-Left
-     0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,           // Bottom-Right
-     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f            // Top-Right
+    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+
+    -0.5f, -0.5f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+     0.5f,  0.5f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f 
   };
   int indices[] = {
     0, 1, 2,
-    1, 2, 3
+    1, 2, 3,
+
+    4, 5, 6,
+    5, 6, 7
   };
   GLFWwindow *window;
 
@@ -132,9 +144,22 @@ int main(void) {
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif
 
-  double scale;
-  unsigned transformLoc = glGetUniformLocation(shaderProgram, "transform");
-  mat4 trans1, trans2;
+  // Transformations
+  unsigned perspectiveLoc = glGetUniformLocation(shaderProgram, "perspective");
+  unsigned viewLoc = glGetUniformLocation(shaderProgram, "view");
+  unsigned modelLoc = glGetUniformLocation(shaderProgram, "model");
+  mat4 perspective, view, model;
+  
+  glm_mat4_identity(perspective);
+  glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1, 100.0f, perspective);
+  glm_mat4_identity(view);
+  glm_translate(view, (vec3){ 0.0f, 0.0f, -3.0f});
+  glm_mat4_identity(model);
+  glm_rotate(model, glm_rad(-55.0f), (vec3){1.0f, 0.0f, 0.0f});
+
+  glUniformMatrix4fv(perspectiveLoc, 1,  GL_FALSE, (float *)perspective);
+  glUniformMatrix4fv(viewLoc, 1,  GL_FALSE, (float *)view);
+  glUniformMatrix4fv(modelLoc, 1,  GL_FALSE, (float *)model);
 
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
@@ -149,18 +174,6 @@ int main(void) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT); 
     // Draw
-    // First Container
-    glm_mat4_identity(trans1);
-    glm_translate(trans1, (vec3){0.5f, -0.5f, 0.0f});
-    glm_rotate(trans1, glfwGetTime(), (vec3){0.0f, 0.0f, 1.0f});
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float *)trans1);
-    glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, NULL);
-    // Second Container
-    scale = sin(glfwGetTime());
-    glm_mat4_identity(trans2);
-    glm_translate(trans2, (vec3){-0.5f, 0.5f, 0.0f});
-    glm_scale(trans2, (vec3){scale, scale, scale});
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float *)trans2);
     glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, NULL);
 
     /*** POLL EVENTS & SWAP BUFFERS ***/

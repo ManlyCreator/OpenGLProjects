@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # Project name
-project(Excercises)
+project(Perspective)
 
 # Compile commands to be read by the LSP
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
