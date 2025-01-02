@@ -19,6 +19,7 @@
 #define BUF_SIZE 512
 #define ALPHA_SPEED 1.0f
 #define ROTATION_SPEED 45.0f
+#define CAMERA_MOVE_SPEED 3.0f
 #define WIREFRAME_MODE 0
 
 void processInput(GLFWwindow* window);
@@ -26,37 +27,71 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 
 float alpha = 0.2f;
 float lastTime = 0, currentTime, deltaTime;
-
-// TODO: Render a cube
-// TODO: Rotate cube
-// TODO: Implement basic camera movement
+float xMove = 0.0f, yMove = 0.0f, zMove = 0.0f;
 
 int main(void) {
   int x, y, nrChannels;
-  unsigned VBO, VAO, EBO;
+  unsigned VBO, VAO;
   unsigned textureObj;
   Shader shaderProgram;
   unsigned char *textureData;
   float vertices[] = {
-    // Vertices         // Colors         // Texture Coordinates
-    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-     0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+      // Vertices          // Texture Coordinates
+      -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+       0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-    -0.5f, -0.5f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    -0.5f,  0.5f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-     0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-     0.5f,  0.5f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f 
-  };
-  int indices[] = {
-    0, 1, 2,
-    1, 2, 3,
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+      -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-    4, 5, 6,
-    5, 6, 7
+      -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+      -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+      -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+       0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+       0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+      -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
   };
   GLFWwindow *window;
+  vec3 cubePositions[] = {
+    {0.0f,  0.0f,  -3.0f}, 
+    {2.0f,  5.0f, -15.0f}, 
+    {-1.5f, -2.2f, -2.5f},  
+    {-3.8f, -2.0f, -12.3f},  
+    { 2.4f, -0.4f, -3.5f},  
+    {-1.7f,  3.0f, -7.5f},  
+    { 1.3f, -2.0f, -2.5f},  
+    { 1.5f,  2.0f, -2.5f}, 
+    { 1.5f,  0.2f, -1.5f}, 
+    {-1.3f,  1.0f, -1.5f}  
+};
 
   // GLFW Initialization
   glfwInit();
@@ -89,9 +124,9 @@ int main(void) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   // Element Buffer Object
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+  // glGenBuffers(1, &EBO);
+  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   // Program Creation
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl")) {
@@ -101,8 +136,6 @@ int main(void) {
   shaderUse(shaderProgram);
 
   // Texture Data
-  stbi_set_flip_vertically_on_load(true);
-
   glGenTextures(1, &textureObj);
   glBindTexture(GL_TEXTURE_2D, textureObj);
 
@@ -130,11 +163,9 @@ int main(void) {
 
   // Setting Vertex Array Data
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -150,31 +181,39 @@ int main(void) {
   unsigned modelLoc = glGetUniformLocation(shaderProgram, "model");
   mat4 perspective, view, model;
   
-  glm_mat4_identity(perspective);
-  glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1, 100.0f, perspective);
-  glm_mat4_identity(view);
-  glm_translate(view, (vec3){ 0.0f, 0.0f, -3.0f});
-  glm_mat4_identity(model);
-  glm_rotate(model, glm_rad(-55.0f), (vec3){1.0f, 0.0f, 0.0f});
-
-  glUniformMatrix4fv(perspectiveLoc, 1,  GL_FALSE, (float *)perspective);
-  glUniformMatrix4fv(viewLoc, 1,  GL_FALSE, (float *)view);
-  glUniformMatrix4fv(modelLoc, 1,  GL_FALSE, (float *)model);
-
   // Render Loop
+  glEnable(GL_DEPTH_TEST);
   while (!glfwWindowShouldClose(window)) {
     // Input
     currentTime = glfwGetTime();
     deltaTime = currentTime - lastTime;
     lastTime = currentTime;
     processInput(window);
-    shaderSetFloat(shaderProgram, "alpha", alpha);
     /*** RENDER COMMANDS ***/
     // Background Color
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
     // Draw
-    glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, NULL);
+    for (int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++) {
+      float angle = i * 20.0f;
+      // Perspective Matrix
+      glm_mat4_identity(perspective);
+      glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1, 100.0f, perspective);
+      // View (Camera) Matrix
+      glm_mat4_identity(view);
+      glm_translate(view, (vec3){cubePositions[i][0] + xMove, cubePositions[i][1] + yMove, cubePositions[i][2] + zMove});
+      // Model Matrix
+      glm_mat4_identity(model);
+      if (i % 3 == 0)
+        angle += glfwGetTime() * 100.0f;
+      glm_rotate(model, glm_rad(angle), (vec3){0.5f, 0.5f, 0.0f});
+      // Setting Uniforms
+      glUniformMatrix4fv(perspectiveLoc, 1,  GL_FALSE, (float *)perspective);
+      glUniformMatrix4fv(viewLoc, 1,  GL_FALSE, (float *)view);
+      glUniformMatrix4fv(modelLoc, 1,  GL_FALSE, (float *)model);
+      // Drawing Cubes
+      glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]));
+    }
 
     /*** POLL EVENTS & SWAP BUFFERS ***/
     glfwPollEvents();
@@ -199,6 +238,19 @@ void processInput(GLFWwindow* window) {
 
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     alpha = (alpha - (ALPHA_SPEED * deltaTime) < 0 ? 0 : alpha - (ALPHA_SPEED * deltaTime));
+
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    xMove += CAMERA_MOVE_SPEED * deltaTime;
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    xMove -= CAMERA_MOVE_SPEED * deltaTime;
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    zMove += CAMERA_MOVE_SPEED * deltaTime;
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    zMove -= CAMERA_MOVE_SPEED * deltaTime;
+  if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    yMove += CAMERA_MOVE_SPEED * deltaTime;
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    yMove -= CAMERA_MOVE_SPEED * deltaTime;
 }
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
