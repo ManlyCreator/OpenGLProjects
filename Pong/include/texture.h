@@ -2,13 +2,12 @@
 #define TEXTURE_H
 
 #include <stdio.h>
+
 #include <glad/glad.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 typedef unsigned Texture;
 
-int textureConstruct(Texture *texture);
+int textureConstruct(Texture *texture, const char *src);
 void textureBind(Texture texture);
 
 #endif

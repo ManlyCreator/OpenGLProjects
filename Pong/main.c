@@ -12,6 +12,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "game.h"
+#include "sprite.h"
 
 // Macros
 #define WIDTH 800
@@ -23,17 +24,19 @@ void processInput(GLFWwindow *window);
 
 float currentTime = 0, lastTime = 0, deltaTime;
 
-// TODO: Finish Texture class
+// TODO: Finish spriteInit() function and draw using Sprite class
 // TODO: Finish breakout section from LearnOpenGL
 
 int main(void) {
   unsigned VAO, VBO, EBO;
   Shader shaderProgram;
+  Texture texture;
   float vertices[] = {
-    -0.01f, -0.01f, 0.0f,
-     0.01f, -0.01f, 0.0f,
-     0.01f,  0.01f, 0.0f,
-    -0.01f,  0.01f, 0.0f
+    // Vertices     // Texutre Coords
+    -0.01f, -0.01f, 0.0f, 0.0f,
+     0.01f, -0.01f, 1.0f, 0.0f,
+     0.01f,  0.01f, 1.0f, 1.0f,
+    -0.01f,  0.01f, 0.0f, 1.0f
   };
   int indices[] = {
     0, 1, 2,
@@ -80,10 +83,15 @@ int main(void) {
 
   // Vertex Array Data
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+
+  // Texture
+  if (!textureConstruct(&texture, "../textures/awesomeface.png"))
+    return -1;
+  textureBind(texture);
 
   // Shader Program
-  if(!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
+  if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
     return -1;
   shaderUse(shaderProgram);
 
@@ -106,13 +114,9 @@ int main(void) {
     // Render Commands
     glClearColor(0.0f, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glm_mat4_identity(projection);
-    glm_ortho(0.0f, WIDTH, HEIGHT, 0.0f, -1.0f, 1.0f, projection);
     glm_mat4_identity(model);
     glm_translate(model, (vec3){(glfwGetTime() * PROJECTILE_SPEED), 0.0f, 0.0f});
-    glm_mat4_print(projection, stdout);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *)model);
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (float *)projection);
     glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
     // Poll Events & Swap Buffers

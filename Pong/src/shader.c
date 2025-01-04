@@ -71,6 +71,14 @@ void shaderSetInt(Shader shader, const char *uniform, int value) {
   glUniform1i(glGetUniformLocation(shader, uniform), value);
 }
 
+void shaderSetVector3f(Shader shader, const char *uniform, vec3 value) {
+  glUniform3f(glGetUniformLocation(shader, uniform), value[0], value[1], value[2]);
+}
+
+void shaderSetMatrix4(Shader shader, const char *uniform, mat4 value) {
+ glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, (float *) value);
+}
+
 void readFile(FILE *file, char **bufPtr) {
   long fileSize;
 

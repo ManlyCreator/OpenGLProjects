@@ -1,7 +1,11 @@
 #version 330 core
 
+uniform sampler2D textureSample;
+
+in vec2 outTexCoords;
+
 out vec4 col;
 
 void main() {
-  col = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  col = texture(textureSample, outTexCoords);
 }
