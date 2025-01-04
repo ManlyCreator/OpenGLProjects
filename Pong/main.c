@@ -1,4 +1,5 @@
 // Standard Libs
+#include <cglm/vec3.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -9,6 +10,8 @@
 // External Libs
 #include <cglm/cglm.h>
 #include "shader.h"
+#include "texture.h"
+#include "game.h"
 
 // Macros
 #define WIDTH 800
@@ -20,8 +23,8 @@ void processInput(GLFWwindow *window);
 
 float currentTime = 0, lastTime = 0, deltaTime;
 
-// TODO: Change projectile's direction after a certain amount of time
-// TODO: Implement collisions
+// TODO: Finish Texture class
+// TODO: Finish breakout section from LearnOpenGL
 
 int main(void) {
   unsigned VAO, VBO, EBO;
@@ -87,9 +90,10 @@ int main(void) {
   // Render Loop
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-  unsigned transformLoc = glGetUniformLocation(shaderProgram, "transform");
-  float angle = glm_rad(225);
-  mat4 transform;
+  mat4 model;
+  mat4 projection;
+  unsigned modelLoc = glGetUniformLocation(shaderProgram, "model");
+  unsigned projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
   while (!glfwWindowShouldClose(window)) {
     currentTime = glfwGetTime();
@@ -102,9 +106,13 @@ int main(void) {
     // Render Commands
     glClearColor(0.0f, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glm_mat4_identity(transform);
-    glm_translate(transform, (vec3){(cos(angle)) * (glfwGetTime() * PROJECTILE_SPEED), (sin(angle)) * (glfwGetTime() * PROJECTILE_SPEED), 0.0f});
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (float *)transform);
+    glm_mat4_identity(projection);
+    glm_ortho(0.0f, WIDTH, HEIGHT, 0.0f, -1.0f, 1.0f, projection);
+    glm_mat4_identity(model);
+    glm_translate(model, (vec3){(glfwGetTime() * PROJECTILE_SPEED), 0.0f, 0.0f});
+    glm_mat4_print(projection, stdout);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *)model);
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (float *)projection);
     glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
     // Poll Events & Swap Buffers
