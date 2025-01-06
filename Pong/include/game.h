@@ -3,6 +3,9 @@
 
 #include <stdbool.h>
 
+#define WIDTH 800
+#define HEIGHT 600
+
 typedef enum {
   GAME_ACTIVE,
   GAME_MENU,

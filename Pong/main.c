@@ -15,33 +15,27 @@
 #include "sprite.h"
 
 // Macros
-#define WIDTH 800
-#define HEIGHT 600
-#define PROJECTILE_SPEED 0.1
+#define BALL_WIDTH 20
+#define BALL_SIZE (vec2){BALL_WIDTH, BALL_WIDTH}
+#define BALL_POS (vec2){-(float)BALL_WIDTH / 2, -(float)BALL_WIDTH / 2}
+#define BALL_VELOCITY (vec2){5.0f, 10.0f}
+#define PADDLE_WIDTH 25
+#define PADDLE_HEIGHT 300
+#define PADDLE_SIZE (vec2){PADDLE_WIDTH, PADDLE_HEIGHT}
+#define PADDLE_POS_L (vec2){-WIDTH, (float)PADDLE_HEIGHT / 2 - (float)HEIGHT / 2}
 
+// Main
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
 float currentTime = 0, lastTime = 0, deltaTime;
 
-// TODO: Finish spriteInit() function and draw using Sprite class
-// TODO: Finish breakout section from LearnOpenGL
-
 int main(void) {
-  unsigned VAO, VBO, EBO;
   Shader shaderProgram;
   Texture texture;
-  float vertices[] = {
-    // Vertices     // Texutre Coords
-    -0.01f, -0.01f, 0.0f, 0.0f,
-     0.01f, -0.01f, 1.0f, 0.0f,
-     0.01f,  0.01f, 1.0f, 1.0f,
-    -0.01f,  0.01f, 0.0f, 1.0f
-  };
-  int indices[] = {
-    0, 1, 2,
-    0, 2, 3
-  };
+  Sprite ball;
+  Sprite paddleL, paddleR;
+  mat4 projection;
   GLFWwindow *window;
 
   // GLFW
@@ -67,41 +61,28 @@ int main(void) {
 
   glViewport(0, 0, WIDTH, HEIGHT);
 
-  // Vertex Array
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  // Vertex Buffer
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  // Element Buffer
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-  // Vertex Array Data
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-
   // Texture
   if (!textureConstruct(&texture, "../textures/awesomeface.png"))
     return -1;
-  textureBind(texture);
 
   // Shader Program
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
     return -1;
-  shaderUse(shaderProgram);
+
+  // Sprites
+  spriteConstruct(&ball, shaderProgram, 0, BALL_SIZE, BALL_POS, (vec2){1.0f, 10.0f});
+  spriteConstruct(&paddleL, shaderProgram, 0, PADDLE_SIZE, PADDLE_POS_L, (vec2){0.0f, 0.0f});
+  spriteConstruct(
+      &paddleR, shaderProgram, 0, (vec2){PADDLE_WIDTH, PADDLE_HEIGHT},
+      (vec2){(float)WIDTH - (float)PADDLE_WIDTH, (float)PADDLE_HEIGHT / 2 - (float)HEIGHT / 2},
+      (vec2){0.0f, 0.0f} 
+  );
+
+  // Projection Matrix
+  glm_ortho(-WIDTH, WIDTH, -HEIGHT, HEIGHT, -1.0f, 1.0f, projection);
 
   // Render Loop
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-
-  mat4 model;
-  mat4 projection;
-  unsigned modelLoc = glGetUniformLocation(shaderProgram, "model");
-  unsigned projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
   while (!glfwWindowShouldClose(window)) {
     currentTime = glfwGetTime();
@@ -112,12 +93,13 @@ int main(void) {
     processInput(window);
 
     // Render Commands
-    glClearColor(0.0f, 0.0, 0.0, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    glm_mat4_identity(model);
-    glm_translate(model, (vec3){(glfwGetTime() * PROJECTILE_SPEED), 0.0f, 0.0f});
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *)model);
-    glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(indices[0]), GL_UNSIGNED_INT, 0);
+    shaderSetMatrix4(shaderProgram, "projection", projection);
+    spriteMove(&ball);
+    spriteDraw(ball, 0.0f, (vec3){1.0f, 1.0f, 1.0f});
+    spriteDraw(paddleL, 0.0f, (vec3){1.0f, 1.0f, 1.0f});
+    spriteDraw(paddleR, 0.0f, (vec3){1.0f, 1.0f, 1.0f});
 
     // Poll Events & Swap Buffers
     glfwPollEvents();

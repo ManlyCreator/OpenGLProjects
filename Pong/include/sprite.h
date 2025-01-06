@@ -4,15 +4,20 @@
 #include <stdio.h>
 #include "shader.h"
 #include "texture.h"
+#include "game.h"
 #include <cglm/cglm.h>
 
 typedef struct {
+  vec2 size;
+  vec2 position;
+  vec2 velocity;
   Shader shader;
   Texture texture;
   unsigned VAO;
 } Sprite;
 
-void spriteInit(Sprite *sprite);
-void spriteDraw(Sprite sprite, vec2 pos, vec2 size, float rotate, vec3 color);
+void spriteConstruct(Sprite *sprite, Shader shader, Texture texture, vec2 size, vec2 pos, vec2 velocity);
+void spriteDraw(Sprite sprite, float rotate, vec3 color);
+void spriteMove(Sprite *sprite);
 
 #endif

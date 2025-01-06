@@ -76,7 +76,7 @@ void shaderSetVector3f(Shader shader, const char *uniform, vec3 value) {
 }
 
 void shaderSetMatrix4(Shader shader, const char *uniform, mat4 value) {
- glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, (float *) value);
+  glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, (float *)value);
 }
 
 void readFile(FILE *file, char **bufPtr) {
