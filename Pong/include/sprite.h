@@ -18,6 +18,5 @@ typedef struct {
 
 void spriteConstruct(Sprite *sprite, Shader shader, Texture texture, vec2 size, vec2 pos, vec2 velocity);
 void spriteDraw(Sprite sprite, float rotate, vec3 color);
-void spriteMove(Sprite *sprite);
 
 #endif

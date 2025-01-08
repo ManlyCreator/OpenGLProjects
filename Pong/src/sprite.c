@@ -47,8 +47,8 @@ void spriteDraw(Sprite sprite, float rotate, vec3 color) {
 
   // Transformations
   glm_mat4_identity(model);
-  glm_translate(model, (vec3){sprite.position[0], sprite.position[1]});
   glm_translate(model, (vec3){0.5 * sprite.size[0], 0.5 * sprite.size[1]});
+  glm_translate(model, (vec3){sprite.position[0], sprite.position[1]});
   glm_rotate(model, glm_rad(rotate), (vec3){0.0f, 0.0f, 1.0f});
   glm_translate(model, (vec3){-0.5 * sprite.size[0], -0.5 * sprite.size[1]});
   glm_scale(model, (vec3){sprite.size[0], sprite.size[1]});
@@ -67,10 +67,4 @@ void spriteDraw(Sprite sprite, float rotate, vec3 color) {
   glBindVertexArray(sprite.VAO);
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glBindVertexArray(0);
-}
-
-void spriteMove(Sprite *sprite) {
-  glm_vec2_add(sprite->position, sprite->velocity, sprite->position);
-  if (-(float)HEIGHT > sprite->position[1] || sprite->position[1] > (float)HEIGHT - sprite->size[1])
-    sprite->velocity[1] = -sprite->velocity[1];
 }
