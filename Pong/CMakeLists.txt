@@ -10,9 +10,11 @@ add_library(Shader src/shader.c)
 add_library(Texture src/texture.c)
 add_library(Game src/game.c)
 add_library(Sprite src/sprite.c)
+add_library(Ball src/ball.c)
+add_library(Paddle src/paddle.c)
 
 include_directories(include/)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT="${PROJECT_NAME}")
 
-target_link_libraries(${PROJECT_NAME} glad glfw3 GL m cglm Shader Texture Game Sprite)
+target_link_libraries(${PROJECT_NAME} glad glfw3 GL m cglm Shader Texture Game Sprite Ball Paddle)
