@@ -4,7 +4,7 @@
 #include "sprite.h"
 #include <GLFW/glfw3.h>
 
-#define PADDLE_WIDTH 50
+#define PADDLE_WIDTH 25
 #define PADDLE_HEIGHT 300
 #define PADDLE_SIZE (vec2){PADDLE_WIDTH, PADDLE_HEIGHT}
 #define PADDLE_POS_L (vec2){-WIDTH, (float)PADDLE_HEIGHT / 2 - (float)HEIGHT / 2}

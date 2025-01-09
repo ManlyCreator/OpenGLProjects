@@ -1,4 +1,5 @@
 #include "ball.h"
+#include "sprite.h"
 
 void ballMove(Ball *ball, Paddle paddles[]) {
   vec2 compass[] = {
@@ -9,6 +10,7 @@ void ballMove(Ball *ball, Paddle paddles[]) {
   };
   Sprite *ballSprite = &ball->base;
   Sprite paddle;
+  Sprite hitSprite;
 
   glm_vec2_add(ballSprite->position, ballSprite->velocity, ballSprite->position);
 
@@ -19,25 +21,51 @@ void ballMove(Ball *ball, Paddle paddles[]) {
 
   // Paddle Collision
   for (int i = 0; i < 2; i++) {
+    int direction = 0;
+    float dot;
+    float length;
+    float clampedX, clampedY;
+    float penetration;
+    float max = 0.0f;
+    Collision collision;
+
     paddle = paddles[i].base;
-    // Vertical Edge Collision
-    if (ballSprite->position[0] <= paddle.position[0] + paddle.size[0] && ballSprite->position[0] + ballSprite->size[0] >= paddle.position[0] &&
-        ballSprite->position[1] <= paddle.position[1] + paddle.size[1] && ballSprite->position[1] >= paddle.position[1]) {
-      vec2 paddleNormalized;
-      float dot;
-      glm_vec2_normalize_to(paddle.position, paddleNormalized);
-      float max = 0.0f;
-      int direction = 0;
+    collision = spriteCheckCollide(*ballSprite, paddle);
+
+    if (collision.didCollide) {
+      glm_vec2_normalize(collision.difference);
       for (int i = 0; i < 4; i++) {
-        dot = glm_vec2_dot(paddleNormalized, compass[i]);
-        // printf("Dot: %g\n", dot);
+        dot = glm_vec2_dot(collision.difference, compass[i]);
         if (dot > max) {
           max = dot;
           direction = i;
         }
       }
-      printf("Edge: %s\n", direction == 0 || direction == 1 ? "HORIZONTAL" : "VERTICAL");
-      ballSprite->velocity[0] = -ballSprite->velocity[0];
+
+      if (direction == UP || direction == DOWN) {
+        if (fabs(paddle.velocity[1]) > 0)
+          ballSprite->velocity[1] = paddle.velocity[1];
+        else
+          ballSprite->velocity[1] = -ballSprite->velocity[1];
+
+        penetration = (ballSprite->size[1] / 2) - collision.difference[1];
+
+        if (direction == UP)
+          ballSprite->position[1] -= penetration;
+        else
+          ballSprite->position[1] += penetration;
+      }
+      else {
+        ballSprite->velocity[0] = -ballSprite->velocity[0];
+
+        penetration = (ballSprite->size[0] / 2) - collision.difference[0];
+
+        if (direction == RIGHT)
+          ballSprite->position[0] -= penetration;
+        else
+          ballSprite->position[0] += penetration;
+      }
+
       ballSprite->velocity[0] *= 1.1;
       ballSprite->velocity[1] *= 1.1;
     }

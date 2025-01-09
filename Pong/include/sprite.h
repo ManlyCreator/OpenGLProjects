@@ -7,6 +7,13 @@
 #include "game.h"
 #include <cglm/cglm.h>
 
+typedef enum {
+  UP,
+  DOWN,
+  RIGHT,
+  LEFT
+} Direction;
+
 typedef struct {
   vec2 size;
   vec2 position;
@@ -16,7 +23,13 @@ typedef struct {
   unsigned VAO;
 } Sprite;
 
+typedef struct {
+  int didCollide;
+  vec2 difference;
+} Collision;
+
 void spriteConstruct(Sprite *sprite, Shader shader, Texture texture, vec2 size, vec2 pos, vec2 velocity);
 void spriteDraw(Sprite sprite, float rotate, vec3 color);
+Collision spriteCheckCollide(Sprite sprite1, Sprite sprite2);
 
 #endif
