@@ -10,13 +10,6 @@
 #define BALL_SPEED 10
 #define BALL_VELOCITY(angle) (vec2){cos(glm_rad(angle)) * BALL_SPEED, sin(glm_rad(angle)) * BALL_SPEED}
 
-typedef enum {
-  UP,
-  DOWN,
-  RIGHT,
-  LEFT
-} Direction;
-
 typedef struct {
   Sprite base;
   int inBounds;

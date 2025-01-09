@@ -20,7 +20,8 @@ void processInput(GLFWwindow *window);
 int gameStart = 0;
 float angles[] = { 30.0f, 45.0f, 100.0f, 135.0f, 300.0f, };
 
-// TODO: Detect which edge gets hit with the ball to properly calculate which way to adjust velocity
+// TODO: Fix collision clipping (visualize collisions without LearnOpenGL to get a better understanding of the algorithm)
+// TODO: Add a gameObjects array in game.h, and a gameObjectsInsert() function in game.c to insert all sprites that must be drawn
 
 int main(void) {
   float ballAngle;
