@@ -87,9 +87,9 @@ int main(void) {
     shaderSetMatrix4(shaderProgram, "projection", projection);
     // Game Logic
     if (gameStart) {
-      ballMove(&ball, (Paddle[]){paddleL, paddleR});
       paddleMove(&paddleL.base, (int[]){GLFW_KEY_W, GLFW_KEY_S}, window);
       paddleMove(&paddleR.base, (int[]){GLFW_KEY_UP, GLFW_KEY_DOWN}, window);
+      ballMove(&ball, (Paddle[]){paddleL, paddleR});
       if (!ball.inBounds) {
         ballAngle = angles[rand() % (sizeof(angles) / sizeof(angles[0]))];
         gameStart = 0;
