@@ -73,19 +73,40 @@ Collision spriteCheckCollide(Sprite sprite1, Sprite sprite2) {
   float length;
   float clampedX, clampedY;
   vec2 sprite1Center, sprite2Center, sprite2HalfExtents, hit, difference;
+  Sprite hitSprite;
   Collision collision;
 
-  glm_vec2((vec2){sprite1.position[0] + sprite1.size[0] / 2, sprite1.position[1] + sprite1.size[1] / 2}, sprite1Center);
-  glm_vec2((vec2){sprite2.size[0] / 2, sprite2.size[1] / 2}, sprite2HalfExtents);
-  glm_vec2((vec2){sprite2.position[0] + sprite2HalfExtents[0], sprite2.position[1] + sprite2HalfExtents[1]}, sprite2Center);
+  glm_vec2_copy((vec2){sprite1.position[0] + sprite1.size[0] / 2, sprite1.position[1] + sprite1.size[1] / 2}, sprite1Center);
+  glm_vec2_copy((vec2){sprite2.size[0] / 2, sprite2.size[1] / 2}, sprite2HalfExtents);
+  glm_vec2_copy((vec2){sprite2.position[0] + sprite2HalfExtents[0], sprite2.position[1] + sprite2HalfExtents[1]}, sprite2Center);
   glm_vec2_sub(sprite1Center, sprite2Center, difference);
+  printf("Sprite 1 Position: ");
+  glm_vec2_print(sprite1.position, stdout);
+  printf("Sprite 2 Position: ");
+  glm_vec2_print(sprite2.position, stdout);
+  printf("Sprite 1 Center: ");
+  glm_vec2_print(sprite1Center, stdout);
+  printf("Sprite 2 Center: ");
+  glm_vec2_print(sprite2Center, stdout);
+  printf("Difference Pre-Clamp: ");
+  glm_vec2_print(difference, stdout);
 
   clampedX = glm_clamp(difference[0], -sprite2HalfExtents[0], sprite2HalfExtents[0]); 
   clampedY = glm_clamp(difference[1], -sprite2HalfExtents[1], sprite2HalfExtents[1]); 
 
   glm_vec2((vec2){clampedX, clampedY}, difference);
+  printf("Difference Post-Clamp: ");
+  glm_vec2_print(difference, stdout);
+
   glm_vec2_add(sprite2Center, difference, hit);
+  printf("Hit Pre-Add: ");
+  glm_vec2_print(hit, stdout);
+  spriteConstruct(&hitSprite, sprite1.shader, 0, (vec2){10.0f, 10.0f}, (vec2){hit[0], hit[1]}, (vec2){0.0f, 0.0f});
+  spriteDraw(hitSprite, 0.0f, (vec3){1.0f, 0.0f, 0.0f});
+
   glm_vec2_sub(hit, sprite1Center, difference);
+  printf("Hit Post-Add: ");
+  glm_vec2_print(difference, stdout);
 
   length = sqrt(pow(difference[0], 2) + pow(difference[1], 2));
 

@@ -18,10 +18,10 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
 int gameStart = 0;
-float angles[] = { 30.0f, 45.0f, 100.0f, 135.0f, 300.0f, };
+// float angles[] = { 30.0f, 45.0f, 100.0f, 135.0f, 300.0f, };
+float angles[] = {0.0f};
 
-// TODO: Fix collision clipping (visualize collisions without LearnOpenGL to get a better understanding of the algorithm)
-// TODO: Add a gameObjects array in game.h, and a gameObjectsInsert() function in game.c to insert all sprites that must be drawn
+// TODO: Debug dot product not being calculated correctly, resulting in innacurate penetration calculation
 
 int main(void) {
   float ballAngle;
@@ -29,7 +29,7 @@ int main(void) {
   Texture texture;
   Ball ball;
   Paddle paddleL, paddleR;
-  mat4 projection;
+  mat4 projection, view;
   GLFWwindow *window;
 
   // GLFW

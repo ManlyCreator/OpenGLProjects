@@ -21,7 +21,7 @@ void ballMove(Ball *ball, Paddle paddles[]) {
 
   // Paddle Collision
   for (int i = 0; i < 2; i++) {
-    int direction = 0;
+    int direction = 2;
     float dot;
     float length;
     float clampedX, clampedY;
@@ -34,8 +34,11 @@ void ballMove(Ball *ball, Paddle paddles[]) {
 
     if (collision.didCollide) {
       glm_vec2_normalize(collision.difference);
+      printf("Collision:\n");
+      // glm_vec2_print(collision.difference, stdout);
       for (int i = 0; i < 4; i++) {
         dot = glm_vec2_dot(collision.difference, compass[i]);
+        printf("%d: %g\n", i, dot);
         if (dot > max) {
           max = dot;
           direction = i;
@@ -59,6 +62,7 @@ void ballMove(Ball *ball, Paddle paddles[]) {
         ballSprite->velocity[0] = -ballSprite->velocity[0];
 
         penetration = (ballSprite->size[0] / 2) - collision.difference[0];
+        printf("Penetration: %g\n", penetration);
 
         if (direction == RIGHT)
           ballSprite->position[0] -= penetration;
