@@ -71,5 +71,5 @@ void spriteDraw(Sprite sprite, float rotate, vec3 color) {
 
 int spriteCheckCollide(Sprite sprite1, Sprite sprite2) {
   return (sprite1.position[0] <= sprite2.position[0] + sprite2.size[0] && sprite1.position[0] + sprite1.size[0] >= sprite2.position[0] &&
-          sprite1.position[1] <= sprite2.position[1] + sprite2.size[1] && sprite1.position[1] + sprite2.size[1] >= sprite2.position[1]);
+          sprite1.position[1] <= sprite2.position[1] + sprite2.size[1] && sprite1.position[1] + sprite1.size[1] >= sprite2.position[1]);
 }

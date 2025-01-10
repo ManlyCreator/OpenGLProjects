@@ -23,12 +23,12 @@ void ballMove(Ball *ball, Paddle paddles[]) {
       float spriteRight = ballSprite->position[0] + ballSprite->size[0];
       float spriteTop = ballSprite->position[1] + ballSprite->size[1];
       float paddleRight = paddle.position[0] + paddle.size[0];
-      float paddleTop = paddle.size[1] + paddle.size[1];
+      float paddleTop = paddle.position[1] + paddle.size[1];
 
-      float overlapRight = fabsf(spriteRight - paddle.position[0]);
-      float overlapLeft = fabsf(paddleRight - ballSprite->position[0]);
-      float overlapTop = fabsf(spriteTop - paddle.position[1]);
-      float overlapBottom = fabsf(paddleTop - ballSprite->position[1]);
+      float overlapRight = spriteRight - paddle.position[0];
+      float overlapLeft = paddleRight - ballSprite->position[0];
+      float overlapTop = spriteTop - paddle.position[1];
+      float overlapBottom = paddleTop - ballSprite->position[1];
 
       float minOverlap = fminf(fminf(overlapRight, overlapLeft), fminf(overlapTop, overlapBottom));
 
