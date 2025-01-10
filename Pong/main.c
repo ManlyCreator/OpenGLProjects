@@ -13,15 +13,13 @@
 #include "ball.h"
 #include "paddle.h"
 
+// TODO: Read book to better understand collisions
 // Main
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
 int gameStart = 0;
-// float angles[] = { 30.0f, 45.0f, 100.0f, 135.0f, 300.0f, };
-float angles[] = {0.0f};
-
-// TODO: Debug dot product not being calculated correctly, resulting in innacurate penetration calculation
+float angles[] = { 30.0f, 120.0f, 210.0f, 300.0f, };
 
 int main(void) {
   float ballAngle;
@@ -88,9 +86,9 @@ int main(void) {
     shaderSetMatrix4(shaderProgram, "projection", projection);
     // Game Logic
     if (gameStart) {
+      ballMove(&ball, (Paddle[]){paddleL, paddleR});
       paddleMove(&paddleL.base, (int[]){GLFW_KEY_W, GLFW_KEY_S}, window);
       paddleMove(&paddleR.base, (int[]){GLFW_KEY_UP, GLFW_KEY_DOWN}, window);
-      ballMove(&ball, (Paddle[]){paddleL, paddleR});
       if (!ball.inBounds) {
         ballAngle = angles[rand() % (sizeof(angles) / sizeof(angles[0]))];
         gameStart = 0;
@@ -101,9 +99,9 @@ int main(void) {
       glm_vec2_copy(PADDLE_POS_L, paddleL.base.position);
       glm_vec2_copy(PADDLE_POS_R, paddleR.base.position);
     }
-    spriteDraw(ball.base, 0.0f, (vec3){1.0f, 1.0f, 1.0f});
     spriteDraw(paddleL.base, 0.0f, (vec3){1.0f, 1.0f, 1.0f});
     spriteDraw(paddleR.base, 0.0f, (vec3){1.0f, 1.0f, 1.0f});
+    spriteDraw(ball.base, 0.0f, (vec3){1.0f, 1.0f, 1.0f});
 
     // Poll Events & Swap Buffers
     glfwPollEvents();

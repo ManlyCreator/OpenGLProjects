@@ -2,12 +2,6 @@
 #include "sprite.h"
 
 void ballMove(Ball *ball, Paddle paddles[]) {
-  vec2 compass[] = {
-    {0.0f, 1.0f},  // Up
-    {0.0f, -1.0f}, // Down
-    {1.0f, 0.0f},  // Right
-    {-1.0f, 0.0f}  // Left
-  };
   Sprite *ballSprite = &ball->base;
   Sprite paddle;
   Sprite hitSprite;
@@ -21,57 +15,43 @@ void ballMove(Ball *ball, Paddle paddles[]) {
 
   // Paddle Collision
   for (int i = 0; i < 2; i++) {
-    int direction = 2;
-    float dot;
-    float length;
-    float clampedX, clampedY;
-    float penetration;
-    float max = 0.0f;
-    Collision collision;
-
+    int collision;
     paddle = paddles[i].base;
     collision = spriteCheckCollide(*ballSprite, paddle);
 
-    if (collision.didCollide) {
-      glm_vec2_normalize(collision.difference);
-      printf("Collision:\n");
-      // glm_vec2_print(collision.difference, stdout);
-      for (int i = 0; i < 4; i++) {
-        dot = glm_vec2_dot(collision.difference, compass[i]);
-        printf("%d: %g\n", i, dot);
-        if (dot > max) {
-          max = dot;
-          direction = i;
-        }
-      }
+    if (collision) {
+      float spriteRight = ballSprite->position[0] + ballSprite->size[0];
+      float spriteTop = ballSprite->position[1] + ballSprite->size[1];
+      float paddleRight = paddle.position[0] + paddle.size[0];
+      float paddleTop = paddle.size[1] + paddle.size[1];
 
-      if (direction == UP || direction == DOWN) {
-        if (fabs(paddle.velocity[1]) > 0)
-          ballSprite->velocity[1] = paddle.velocity[1];
+      float overlapRight = fabsf(spriteRight - paddle.position[0]);
+      float overlapLeft = fabsf(paddleRight - ballSprite->position[0]);
+      float overlapTop = fabsf(spriteTop - paddle.position[1]);
+      float overlapBottom = fabsf(paddleTop - ballSprite->position[1]);
+
+      float minOverlap = fminf(fminf(overlapRight, overlapLeft), fminf(overlapTop, overlapBottom));
+
+      if (minOverlap == overlapRight || minOverlap == overlapLeft) {
+        ballSprite->velocity[0] = -ballSprite->velocity[0];
+        if (minOverlap == overlapRight)
+          ballSprite->position[0] -= overlapRight;
         else
-          ballSprite->velocity[1] = -ballSprite->velocity[1];
-
-        penetration = (ballSprite->size[1] / 2) - collision.difference[1];
-
-        if (direction == UP)
-          ballSprite->position[1] -= penetration;
-        else
-          ballSprite->position[1] += penetration;
+          ballSprite->position[0] += overlapLeft;
       }
       else {
-        ballSprite->velocity[0] = -ballSprite->velocity[0];
-
-        penetration = (ballSprite->size[0] / 2) - collision.difference[0];
-        printf("Penetration: %g\n", penetration);
-
-        if (direction == RIGHT)
-          ballSprite->position[0] -= penetration;
-        else
-          ballSprite->position[0] += penetration;
+        ballSprite->velocity[1] = -ballSprite->velocity[1];
+        if (minOverlap == overlapTop) {
+          ballSprite->position[1] += overlapTop;
+        }
+        else {
+          ballSprite->position[1] += overlapBottom;
+        }
       }
-
-      ballSprite->velocity[0] *= 1.1;
-      ballSprite->velocity[1] *= 1.1;
+      if (sqrt(pow(ballSprite->velocity[0] * 1.1, 2) + pow(ballSprite->velocity[0] * 1.1, 2)) < 50) {
+        ballSprite->velocity[0] *= 1.1;
+        ballSprite->velocity[1] *= 1.1;
+      }
     }
   }
 
