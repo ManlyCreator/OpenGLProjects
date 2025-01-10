@@ -30,6 +30,6 @@ typedef struct {
 
 void spriteConstruct(Sprite *sprite, Shader shader, Texture texture, vec2 size, vec2 pos, vec2 velocity);
 void spriteDraw(Sprite sprite, float rotate, vec3 color);
-Collision spriteCheckCollide(Sprite sprite1, Sprite sprite2);
+int spriteCheckCollide(Sprite sprite1, Sprite sprite2);
 
 #endif
