@@ -8,6 +8,8 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+void frameBufferSizeCallback(GLFWwindow *window, int width, int height);
+
 int main(void) {
   unsigned VAO, VBO;
   unsigned shaderProgram;
@@ -60,6 +62,10 @@ int main(void) {
     return -1;
   shaderUse(shaderProgram);
 
+  // Callbacks
+  glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback); 
+
+  // Render Loop
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -70,4 +76,8 @@ int main(void) {
   glfwTerminate();
 
   return 0;
+}
+
+void frameBufferSizeCallback(GLFWwindow *window, int width, int height) {
+ glViewport(0, 0, width, height);
 }

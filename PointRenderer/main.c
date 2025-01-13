@@ -16,6 +16,8 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
 int main(void) {
+  unsigned shaderProgram;
+  unsigned VAO, VBO;
   GLFWwindow *window;
 
   // GLFW
@@ -43,6 +45,13 @@ int main(void) {
 
   glViewport(0, 0, WIDTH, HEIGHT);
 
+  // Shader
+  if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
+    return -1;
+
+  // Vertex Array
+  glGenVertexArrays(1, &VAO);
+
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
   glfwSetKeyCallback(window, keyCallback);
@@ -50,8 +59,12 @@ int main(void) {
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
     // Render Commands
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    glBindVertexArray(VAO);
+    shaderUse(shaderProgram);
+    glPointSize(30.0f);
+    glDrawArrays(GL_POINTS, 0, 1);
 
     // Poll Events & Swap Buffers
     glfwPollEvents();
