@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 // External Libraries
+#include <cglm/cglm.h>
 #include "shader.h"
 
 #define WIDTH 800
@@ -15,16 +16,20 @@
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
-// TODO: Finish rendering cube
+// TODO: Make a Cube library
+// TODO: Render cube
 
 int main(void) {
   unsigned VAO, VBO;
   unsigned shaderProgram;
   GLFWwindow *window;
   float vertices[] = {
-    -1.0f,  1.0f,  0.0f, 
+    -1.0f,  1.0f, 0.0f, 
     -1.0f, -1.0f, 0.0f,
-     1.0f, -1.0f, 0.0f
+     1.0f, -1.0f, 0.0f,
+     1.0f, -1.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f,
+     1.0f,  1.0f, 0.0f
   };
 
   // GLFW
@@ -67,6 +72,17 @@ int main(void) {
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
+  // Transformations
+  mat4 projection, model; 
+  glm_mat4_identity(projection);
+  glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 100.0f, projection);
+
+  glm_mat4_identity(model);
+  glm_translate(model, (vec4){0.0f, 0.0f, -3.0f});
+  glm_rotate(model, glm_rad(-30.0f), (vec3){1.0f, 0.0f, 0.0f});
+  glm_scale(model, (vec3){0.5f, 0.5f, 0.5f});
+
+
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
   glfwSetKeyCallback(window, keyCallback);
@@ -74,11 +90,14 @@ int main(void) {
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
     // Render Commands
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    // Cube Transform
     glBindVertexArray(VAO);
     shaderUse(shaderProgram);
+    shaderSetMatrix4(shaderProgram, "projection", projection);
+    shaderSetMatrix4(shaderProgram, "model", model);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]));
 
     // Poll Events & Swap Buffers
     glfwPollEvents();
