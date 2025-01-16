@@ -75,7 +75,7 @@ Cube cubeInit(Shader shader, vec3 pos, vec3 size, vec3 rot) {
   return cube;
 }
 
-void cubeDraw(Cube cube) {
+void cubeDraw(Cube cube, long number) {
   mat4 model;
 
   glm_mat4_identity(model);
@@ -88,6 +88,6 @@ void cubeDraw(Cube cube) {
   shaderUse(cube.shader);
   shaderSetMatrix4(cube.shader, "model", model);
   glBindVertexArray(cube.VAO);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
+  glDrawArraysInstanced(GL_TRIANGLES, 0, 36, number);
   glBindVertexArray(0);
 }

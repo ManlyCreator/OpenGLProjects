@@ -11,18 +11,16 @@
 #include "shader.h"
 #include "cube.h"
 
-#define WIDTH 1500
-#define HEIGHT 1500
+#define WIDTH 1000
+#define HEIGHT 1000
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
+float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 50.0f;
 double currentTime;
 
-// TODO: Space out different cubes
-
 int main(void) {
-  float cameraX, cameraY, cameraZ;
   double timeFactor;
   unsigned shaderProgram;
   mat4 projection, view;
@@ -60,11 +58,8 @@ int main(void) {
 
   // Transformations
   glm_mat4_identity(projection);
-  glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 100.0f, projection);
+  glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 200.0f, projection);
 
-
-  cameraX = cameraY = 0;
-  cameraZ = 10.0f;
 
   glm_mat4_identity(view);
   glm_translate(view, (vec3){-cameraX, -cameraY, -cameraZ});
@@ -85,13 +80,9 @@ int main(void) {
 
     shaderSetMatrix4(shaderProgram, "projection", projection);
     shaderSetMatrix4(shaderProgram, "view", view);
+    shaderSetFloat(shaderProgram, "currentTime", currentTime);
 
-    for (int i = 0; i < 10; i++) {
-      timeFactor = currentTime + i;
-      glm_vec3_copy((vec3){sin(timeFactor*0.5), cos(timeFactor*0.5), sin(timeFactor*0.5)}, cube.position);
-      glm_vec3_copy((vec3){timeFactor * 20, timeFactor * 20, currentTime * 20}, cube.rotation);
-      cubeDraw(cube);
-    }
+    cubeDraw(cube, 10);
 
     // Poll Events & Swap Buffers
     glfwPollEvents();

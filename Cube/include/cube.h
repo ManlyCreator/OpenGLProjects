@@ -13,4 +13,4 @@ typedef struct {
 } Cube;
 
 Cube cubeInit(Shader shader, vec3 pos, vec3 size, vec3 rot);
-void cubeDraw(Cube cube);
+void cubeDraw(Cube cube, long number);
