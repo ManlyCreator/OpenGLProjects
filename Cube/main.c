@@ -9,6 +9,7 @@
 // External Libraries
 #include <cglm/cglm.h>
 #include "shader.h"
+#include "cube.h"
 
 #define WIDTH 800
 #define HEIGHT 600
