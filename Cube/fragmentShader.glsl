@@ -1,7 +1,9 @@
 #version 330 core
 
-out vec4 col;
+in vec4 outCol;
+
+out vec4 fragCol;
 
 void main(void) {
-  col = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+  fragCol = outCol;
 }

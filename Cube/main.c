@@ -11,27 +11,23 @@
 #include "shader.h"
 #include "cube.h"
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 1500
+#define HEIGHT 1500
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
-// TODO: Make a Cube library
-// TODO: Render cube
+double currentTime;
+
+// TODO: Space out different cubes
 
 int main(void) {
-  unsigned VAO, VBO;
+  float cameraX, cameraY, cameraZ;
+  double timeFactor;
   unsigned shaderProgram;
+  mat4 projection, view;
   GLFWwindow *window;
-  float vertices[] = {
-    -1.0f,  1.0f, 0.0f, 
-    -1.0f, -1.0f, 0.0f,
-     1.0f, -1.0f, 0.0f,
-     1.0f, -1.0f, 0.0f,
-    -1.0f,  1.0f, 0.0f,
-     1.0f,  1.0f, 0.0f
-  };
+  Cube cube;
 
   // GLFW
   glfwInit();
@@ -62,43 +58,40 @@ int main(void) {
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
     return -1;
 
-  // Vertex Array
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-
   // Transformations
-  mat4 projection, model; 
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 100.0f, projection);
 
-  glm_mat4_identity(model);
-  glm_translate(model, (vec4){0.0f, 0.0f, -3.0f});
-  glm_rotate(model, glm_rad(-30.0f), (vec3){1.0f, 0.0f, 0.0f});
-  glm_scale(model, (vec3){0.5f, 0.5f, 0.5f});
 
+  cameraX = cameraY = 0;
+  cameraZ = 10.0f;
+
+  glm_mat4_identity(view);
+  glm_translate(view, (vec3){-cameraX, -cameraY, -cameraZ});
+
+  cube = cubeInit(shaderProgram, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){-45.0f, 0.0f, 0.0f});
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
   glfwSetKeyCallback(window, keyCallback);
   
+  glEnable(GL_DEPTH_TEST);
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
+    currentTime = glfwGetTime();
     // Render Commands
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    // Cube Transform
-    glBindVertexArray(VAO);
-    shaderUse(shaderProgram);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     shaderSetMatrix4(shaderProgram, "projection", projection);
-    shaderSetMatrix4(shaderProgram, "model", model);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]));
+    shaderSetMatrix4(shaderProgram, "view", view);
+
+    for (int i = 0; i < 10; i++) {
+      timeFactor = currentTime + i;
+      glm_vec3_copy((vec3){sin(timeFactor*0.5), cos(timeFactor*0.5), sin(timeFactor*0.5)}, cube.position);
+      glm_vec3_copy((vec3){timeFactor * 20, timeFactor * 20, currentTime * 20}, cube.rotation);
+      cubeDraw(cube);
+    }
 
     // Poll Events & Swap Buffers
     glfwPollEvents();

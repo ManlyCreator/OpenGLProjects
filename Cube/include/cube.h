@@ -5,8 +5,12 @@
 #include "shader.h"
 
 typedef struct {
+  unsigned shader;
   unsigned VAO;
+  vec3 position;
+  vec3 size;
+  vec3 rotation;
 } Cube;
 
-void cubeInit(Shader shader, vec3 pos, vec3 size);
-void cubeDraw();
+Cube cubeInit(Shader shader, vec3 pos, vec3 size, vec3 rot);
+void cubeDraw(Cube cube);
