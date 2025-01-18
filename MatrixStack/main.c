@@ -23,16 +23,17 @@ void stackPop(void);
 int stackGetTop(void);
 
 unsigned stackTop = 0;
-float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 5.0f;
+float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 10.0f;
 double currentTime;
+mat4 projection;
 mat4 matrixStack[NUM_MATRICES];
 
-// TODO: Pg. 92
+// TODO: Pg. 101, Excercise 4.4
 
 int main(void) {
   double timeFactor;
   unsigned shaderProgram;
-  mat4 projection, view;
+  mat4 view;
   GLFWwindow *window;
   Scene scene;
 
@@ -64,16 +65,12 @@ int main(void) {
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
     return -1;
 
-  // Transformations
+  // Projection Matrix
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 200.0f, projection);
 
-
-
+  // Scene Setup
   scene = sceneInit(shaderProgram);
-  glm_vec3((vec4){0.2f, 0.2f, 0.2f, 1.0f}, scene.cube.size);
-
-  glm_vec3((vec4){0.5f, 0.5f, 0.5f, 1.0f}, scene.pyramid.size);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -91,23 +88,26 @@ int main(void) {
 
     /*** MATRIX STACK ***/
     // View
+    stackPush(view);
     glm_mat4_identity(view);
+    glm_rotate(matrixStack[stackGetTop()], glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
+    stackPush(matrixStack[stackGetTop()]);
     glm_translate(view, (vec3){-cameraX, -cameraY, -cameraZ});
     shaderSetMatrix4(shaderProgram, "view", view);
-    stackPush(view);
+    stackPop();
 
     // Sun (Pyramid)
     stackPush(matrixStack[stackGetTop()]);
-    glm_translate(matrixStack[stackGetTop()], (vec3){-2.0f, 0.0f, 0.0f});
+    glm_translate(matrixStack[stackGetTop()], (vec3){0.0f, 0.0f, 0.0f});
     stackPush(matrixStack[stackGetTop()]);
     glm_rotate(matrixStack[stackGetTop()], glm_rad(sin(currentTime * 2) * 20.0f), (vec3){1.0f, 0.0f, 0.0f});
     stackPush(matrixStack[stackGetTop()]);
     glm_rotate(matrixStack[stackGetTop()], currentTime * 2, (vec3){0.0f, 1.0f, 0.0f});
     shaderSetMatrix4(shaderProgram, "model", matrixStack[stackGetTop()]);
     pyramidDraw(scene);
-    stackPop(); stackPop();
 
-    // Planet (Big Cube)
+    // Planet 1 (Big Cube)
+    stackPop(); stackPop();
     stackPush(matrixStack[stackGetTop()]);
     glm_translate(matrixStack[stackGetTop()], (vec3){4.0f, 0.0f, 0.0f});
     stackPush(matrixStack[stackGetTop()]);
@@ -127,6 +127,18 @@ int main(void) {
     shaderSetMatrix4(shaderProgram, "model", matrixStack[stackGetTop()]);
     cubeDraw(scene);
 
+    // Planet 2 (Bipyramid)
+    stackPop(); stackPop(); stackPop(); stackPop(); stackPop();
+    stackPush(matrixStack[stackGetTop()]);
+    glm_translate(matrixStack[stackGetTop()], (vec3){-8.0f, sin(currentTime) * 5.0f, cos(currentTime) * 5.0f});
+    stackPush(matrixStack[stackGetTop()]);
+    glm_rotate(matrixStack[stackGetTop()], currentTime, (vec3){0.0f, 1.0f, 0.0f});
+    stackPush(matrixStack[stackGetTop()]);
+    glm_rotate(matrixStack[stackGetTop()], glm_rad(45.0f), (vec3){0.0f, 0.0f, 1.0f});
+    shaderSetMatrix4(shaderProgram, "model", matrixStack[stackGetTop()]);
+    bipyramidDraw(scene);
+
+    // Reset Stack
     stackTop = 0;
 
     // Poll Events & Swap Buffers
@@ -142,6 +154,8 @@ int main(void) {
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
+  glm_mat4_identity(projection);
+  glm_perspective(glm_rad(45.0f), (float)width / height, 0.1f, 200.0f, projection);
 }
 
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods) {

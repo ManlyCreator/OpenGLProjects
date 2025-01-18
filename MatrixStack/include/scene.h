@@ -7,7 +7,7 @@
 #include <cglm/cglm.h>
 #include "shader.h"
 
-typedef enum { CUBE, PYRAMID } Shape; 
+typedef enum { CUBE, PYRAMID, BIPYRAMID } Shape; 
 
 typedef struct {
   vec3 position;
@@ -24,7 +24,7 @@ typedef struct {
 typedef struct {
   unsigned shader;
   unsigned VAO;
-  unsigned VBOs[2];
+  unsigned VBOs[3];
   Cube cube;
   Pyramid pyramid;
 } Scene;
@@ -32,5 +32,6 @@ typedef struct {
 Scene sceneInit(Shader shader);
 void cubeDraw(Scene scene);
 void pyramidDraw(Scene scene);
+void bipyramidDraw(Scene scene);
 
 #endif
