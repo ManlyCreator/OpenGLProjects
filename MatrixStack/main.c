@@ -28,8 +28,6 @@ double currentTime;
 mat4 projection;
 mat4 matrixStack[NUM_MATRICES];
 
-// TODO: Pg. 101, Excercise 4.4
-
 int main(void) {
   double timeFactor;
   unsigned shaderProgram;
@@ -76,6 +74,8 @@ int main(void) {
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
   glfwSetKeyCallback(window, keyCallback);
   
+  mat4 model;
+  glm_mat4_identity(model);
   glEnable(GL_DEPTH_TEST);
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
@@ -88,26 +88,22 @@ int main(void) {
 
     /*** MATRIX STACK ***/
     // View
-    stackPush(view);
-    glm_mat4_identity(view);
-    glm_rotate(matrixStack[stackGetTop()], glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
-    stackPush(matrixStack[stackGetTop()]);
-    glm_translate(view, (vec3){-cameraX, -cameraY, -cameraZ});
+    glm_lookat((vec3){sin(currentTime) * 20.0f, 0.0f, cos(currentTime) * 20.0f}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
     shaderSetMatrix4(shaderProgram, "view", view);
-    stackPop();
 
     // Sun (Pyramid)
-    stackPush(matrixStack[stackGetTop()]);
+    stackPush(model);
     glm_translate(matrixStack[stackGetTop()], (vec3){0.0f, 0.0f, 0.0f});
     stackPush(matrixStack[stackGetTop()]);
     glm_rotate(matrixStack[stackGetTop()], glm_rad(sin(currentTime * 2) * 20.0f), (vec3){1.0f, 0.0f, 0.0f});
     stackPush(matrixStack[stackGetTop()]);
     glm_rotate(matrixStack[stackGetTop()], currentTime * 2, (vec3){0.0f, 1.0f, 0.0f});
+    stackPush(matrixStack[stackGetTop()]);
     shaderSetMatrix4(shaderProgram, "model", matrixStack[stackGetTop()]);
     pyramidDraw(scene);
 
     // Planet 1 (Big Cube)
-    stackPop(); stackPop();
+    stackPop(); stackPop(); stackPop();
     stackPush(matrixStack[stackGetTop()]);
     glm_translate(matrixStack[stackGetTop()], (vec3){4.0f, 0.0f, 0.0f});
     stackPush(matrixStack[stackGetTop()]);
