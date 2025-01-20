@@ -2,44 +2,39 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-// OpenGL Dependencies
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 // External Libraries
-#include <cglm/cglm.h>
-#include "shader.h"
-#include "cube.h"
+#include "scene.h"
+#include "utils.h"
 
 #define WIDTH 1000
 #define HEIGHT 1000
 
-// TODO: Rework library to render pyramids
-// TODO: Implement textures
-
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
-float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 50.0f;
+float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 5.0f;
 double currentTime;
+
+// TODO: Implement CCW winding order on cube
+// TODO: Create one class to initialize generic shapes
 
 int main(void) {
   double timeFactor;
-  unsigned shaderProgram;
+  Shader shaderProgram;
+  Texture checker;
   mat4 projection, view;
   GLFWwindow *window;
-  Cube cube;
+  Scene scene;
 
   // GLFW
   glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   window = glfwCreateWindow(WIDTH, HEIGHT, PROJECT, NULL, NULL);
 
-  if (window == NULL)
-  {
+  if (window == NULL) {
     printf("Window creation failed\n");
     glfwTerminate();
     return -1;
@@ -55,6 +50,9 @@ int main(void) {
 
   glViewport(0, 0, WIDTH, HEIGHT);
 
+  // Textures
+  if (!textureLoad("../textures/checkerboard.jpg"))
+    return -1;
   // Shader
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
     return -1;
@@ -67,7 +65,12 @@ int main(void) {
   glm_mat4_identity(view);
   glm_translate(view, (vec3){-cameraX, -cameraY, -cameraZ});
 
-  cube = cubeInit(shaderProgram, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.5f, 0.5f, 0.5f}, (vec3){-45.0f, 0.0f, 0.0f});
+  scene = sceneInit(shaderProgram);
+  glm_vec3((vec4){1.0f, 1.0f, 0.0f, 1.0f}, scene.pyramid.position);
+  glm_vec3((vec4){0.5f, 0.5f, 0.5f, 1.0f}, scene.pyramid.size);
+
+  glm_vec3((vec4){-1.0f, -1.0f, 0.0f, 1.0f}, scene.cube.position);
+  glm_vec3((vec4){0.5f, 0.5f, 0.5f, 1.0f}, scene.cube.size);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -85,7 +88,17 @@ int main(void) {
     shaderSetMatrix4(shaderProgram, "view", view);
     shaderSetFloat(shaderProgram, "currentTime", currentTime);
 
-    cubeDraw(cube, 10);
+    // Pyramid
+    scene.pyramid.rotation[0] = sin(currentTime * 2) * 30.0f;
+    scene.pyramid.rotation[1] = currentTime * 50.0f;
+
+    pyramidDraw(scene);
+
+    // Cube
+    /*scene.cube.rotation[0] = currentTime * 20.0f;*/
+    /*scene.cube.rotation[1] = currentTime * 20.0f;*/
+
+    cubeDraw(scene);
 
     // Poll Events & Swap Buffers
     glfwPollEvents();
