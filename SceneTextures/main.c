@@ -15,8 +15,7 @@ void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods
 float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 5.0f;
 double currentTime;
 
-// TODO: Implement CCW winding order on cube
-// TODO: Create one class to initialize generic shapes
+// TODO: Create a Shape struct and typedef each shape to the struct
 
 int main(void) {
   double timeFactor;
@@ -51,7 +50,7 @@ int main(void) {
   glViewport(0, 0, WIDTH, HEIGHT);
 
   // Textures
-  if (!textureLoad("../textures/checkerboard.jpg"))
+  if (!(checker = textureLoad("../textures/checkerboard.jpg")))
     return -1;
   // Shader
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
@@ -65,22 +64,25 @@ int main(void) {
   glm_mat4_identity(view);
   glm_translate(view, (vec3){-cameraX, -cameraY, -cameraZ});
 
+  // Scene Setup
   scene = sceneInit(shaderProgram);
   glm_vec3((vec4){1.0f, 1.0f, 0.0f, 1.0f}, scene.pyramid.position);
   glm_vec3((vec4){0.5f, 0.5f, 0.5f, 1.0f}, scene.pyramid.size);
+  scene.pyramid.texture = 0;
 
-  glm_vec3((vec4){-1.0f, -1.0f, 0.0f, 1.0f}, scene.cube.position);
-  glm_vec3((vec4){0.5f, 0.5f, 0.5f, 1.0f}, scene.cube.size);
+  glm_vec3((vec4){0, -1.0f, 0.0f, 1.0f}, scene.cube.position);
+  glm_vec3((vec4){10.0f, 0.5f, 20.0f, 1.0f}, scene.cube.size);
+  scene.cube.texture = checker;
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
   glfwSetKeyCallback(window, keyCallback);
   
-  glEnable(GL_DEPTH_TEST);
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
     currentTime = glfwGetTime();
     // Render Commands
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -91,14 +93,10 @@ int main(void) {
     // Pyramid
     scene.pyramid.rotation[0] = sin(currentTime * 2) * 30.0f;
     scene.pyramid.rotation[1] = currentTime * 50.0f;
-
-    pyramidDraw(scene);
+    sceneDraw(scene, PYRAMID);
 
     // Cube
-    /*scene.cube.rotation[0] = currentTime * 20.0f;*/
-    /*scene.cube.rotation[1] = currentTime * 20.0f;*/
-
-    cubeDraw(scene);
+    sceneDraw(scene, CUBE);
 
     // Poll Events & Swap Buffers
     glfwPollEvents();

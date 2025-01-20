@@ -8,38 +8,31 @@
 #include "texture.h"
 #include "shader.h"
 
-typedef enum { PYRAMID, CUBE } Shape; 
+#define NUM_SHAPES 3
+#define PYRAMID_VERTS 18
+#define CUBE_VERTS 36
 
-typedef struct {
-  vec3 position;
-  vec3 size;
-  vec3 rotation;
-} Plane;
-
-typedef struct {
-  Texture texture;
-  vec3 position;
-  vec3 size;
-  vec3 rotation;
-} Cube;
+typedef enum { PYRAMID, CUBE } ShapeEnum; 
 
 typedef struct {
   Texture texture;
   vec3 position;
   vec3 size;
   vec3 rotation;
-} Pyramid;
+} Shape;
+
+typedef Shape Pyramid;
+typedef Shape Cube;
 
 typedef struct {
   Shader shader;
   unsigned VAO;
-  unsigned VBOs[3];
-  Cube cube;
+  unsigned VBOs[NUM_SHAPES];
   Pyramid pyramid;
+  Cube cube;
 } Scene;
 
 Scene sceneInit(Shader shader);
-void cubeDraw(Scene scene);
-void pyramidDraw(Scene scene);
+void sceneDraw(Scene scene, int shapeEnum);
 
 #endif
