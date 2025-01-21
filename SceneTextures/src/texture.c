@@ -10,7 +10,7 @@ Texture textureLoad(const char *src) {
   unsigned char *textureData = stbi_load(src, &width, &height, &n, 0);
 
   if (textureData) {
-    float anisoValue;
+    float maxAniso;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -21,8 +21,8 @@ Texture textureLoad(const char *src) {
     // Mipmap Settings
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &anisoValue);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, anisoValue);
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAniso);
 
     // Texture Data
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);

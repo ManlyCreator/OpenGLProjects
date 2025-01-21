@@ -111,9 +111,8 @@ Scene sceneInit(Shader shader) {
   return scene;
 }
 
-void sceneDraw(Scene scene, int shapeEnum) {
+void sceneDraw(Scene scene, int shapeEnum, mat4 model) {
   int nVertices;
-  mat4 model;
   Shape shape;
 
   switch (shapeEnum) {
@@ -131,13 +130,6 @@ void sceneDraw(Scene scene, int shapeEnum) {
   glBindVertexArray(scene.VAO);
 
   // Transform
-  glm_mat4_identity(model);
-  glm_translate(model, shape.position);
-  glm_rotate(model, glm_rad(shape.rotation[0]), (vec3){1.0f, 0.0f, 0.0f});
-  glm_rotate(model, glm_rad(shape.rotation[1]), (vec3){0.0f, 1.0f, 0.0f});
-  glm_rotate(model, glm_rad(shape.rotation[2]), (vec3){0.0f, 0.0f, 1.0f});
-  glm_scale(model, shape.size);
-
   shaderSetMatrix4(scene.shader, "model", model);
   glBindBuffer(GL_ARRAY_BUFFER, scene.VBOs[shapeEnum]);
 
@@ -163,4 +155,13 @@ void sceneDraw(Scene scene, int shapeEnum) {
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
+}
+
+void sceneTranslate(Scene scene, float *pos, float *rot, float *size, vec4 *model) {
+  glm_mat4_identity(model);
+  glm_translate(model, pos);
+  glm_rotate(model, glm_rad(rot[0]), (vec3){1.0f, 0.0f, 0.0f});
+  glm_rotate(model, glm_rad(rot[1]), (vec3){0.0f, 1.0f, 0.0f});
+  glm_rotate(model, glm_rad(rot[2]), (vec3){0.0f, 0.0f, 1.0f});
+  glm_scale(model, size);
 }

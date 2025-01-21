@@ -33,6 +33,7 @@ typedef struct {
 } Scene;
 
 Scene sceneInit(Shader shader);
-void sceneDraw(Scene scene, int shapeEnum);
+void sceneDraw(Scene scene, int shapeEnum, mat4 model);
+void sceneTranslate(Scene scene, vec3 pos, vec3 rot, vec3 size, mat4 model);
 
 #endif
