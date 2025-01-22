@@ -3,8 +3,6 @@
 #include <stdbool.h>
 
 // External Libraries
-#include "scene.h"
-#include "shader.h"
 #include "utils.h"
 
 #define WIDTH 1000
@@ -13,17 +11,10 @@
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods);
-void stackPush(mat4 matrix);
-void stackPop(mat4 dest);
-int stackGetTop(void);
 
-unsigned stackTop = 0;
 float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
-mat4 matrixStack[NUM_MATRICES];
-
-// TODO: Create a Moon object
 
 int main(void) {
   double timeFactor;
@@ -32,6 +23,7 @@ int main(void) {
   mat4 view, model;
   GLFWwindow *window;
   Scene scene;
+  MStack stack = mStackInit();
 
   // GLFW
   glfwInit();
@@ -61,6 +53,8 @@ int main(void) {
   if (!(sun = textureLoad("../textures/sun.jpg")))
     return -1;
   if (!(earth = textureLoad("../textures/earth.jpg")))
+    return -1;
+  if (!(moon = textureLoad("../textures/moon.jpg")))
     return -1;
   // Shader
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
@@ -97,24 +91,31 @@ int main(void) {
 
     // Sun
     scene.cube.texture = sun;
-    stackPush(model);
-    glm_translate(matrixStack[stackGetTop()], (vec3){0.0f, 0.0f, 0.0f});
-    stackPush(matrixStack[stackGetTop()]);
-    glm_rotate(matrixStack[stackGetTop()], sin(currentTime), (vec3){1.0f, 0.0f, 0.0f});
-    sceneDraw(scene, CUBE, matrixStack[stackGetTop()]);
-    stackPop(NULL);
+    mStackPush(&stack, model);
+    glm_translate(mStackGet(&stack), (vec3){0.0f, 0.0f, 0.0f});
+    mStackPush(&stack, mStackGet(&stack));
+    glm_rotate(mStackGet(&stack), currentTime, (vec3){1.0f, 1.0f, 0.0f});
+    sceneDraw(scene, CUBE, mStackGet(&stack));
+    mStackPop(&stack, NULL);
 
     // Earth
     scene.cube.texture = earth;
-    stackPush(matrixStack[stackGetTop()]);
-    glm_translate(matrixStack[stackGetTop()], (vec3){5.0f, 0.0f, 0.0f});
-    stackPush(matrixStack[stackGetTop()]);
-    glm_rotate(matrixStack[stackGetTop()], currentTime, (vec3){1.0f, 0.0f, 0.0f});
-    glm_rotate(matrixStack[stackGetTop()], currentTime, (vec3){0.0f, 1.0f, 0.0f});
-    sceneDraw(scene, CUBE, matrixStack[stackGetTop()]);
-    stackPop(NULL);
+    mStackPush(&stack, mStackGet(&stack));
+    glm_translate(mStackGet(&stack), (vec3){5.0f, 0.0f, 0.0f});
+    mStackPush(&stack, mStackGet(&stack));
+    glm_rotate(mStackGet(&stack), sin(currentTime), (vec3){1.0f, 0.0f, 0.0f});
+    sceneDraw(scene, CUBE, mStackGet(&stack));
+    mStackPop(&stack, NULL);
 
-    stackTop = 0;
+    // Moon
+    scene.pyramid.texture = moon;
+    mStackPush(&stack, mStackGet(&stack));
+    glm_translate(mStackGet(&stack), (vec3){sin(currentTime) * 2.0f, cos(currentTime) * 2.0f, sin(currentTime) * 2.0f});
+    glm_rotate(mStackGet(&stack), currentTime, (vec3){0.0f, 1.0f, 0.0f});
+    glm_scale(mStackGet(&stack), (vec3){0.5f, 0.5f, 0.5f});
+    sceneDraw(scene, PYRAMID, mStackGet(&stack));
+
+    mStackClear(&stack);
 
     // Poll Events & Swap Buffers
     glfwPollEvents();
@@ -136,18 +137,4 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
-}
-
-void stackPush(mat4 matrix) {
-  glm_mat4_copy(matrix, matrixStack[stackTop++]);
-}
-
-void stackPop(mat4 dest) {
-  stackTop--;
-  if (dest)
-    glm_mat4_copy(matrixStack[stackTop], dest);
-}
-
-int stackGetTop() {
-  return stackTop - 1;
 }
