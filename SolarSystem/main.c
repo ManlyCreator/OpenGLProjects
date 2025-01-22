@@ -86,7 +86,7 @@ int main(void) {
 
     // View
     glm_mat4_identity(view);
-    glm_lookat((vec3){cameraX, cameraY, cameraZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
+    glm_lookat((vec3){sin(currentTime) * 30.0f, cameraY, cos(currentTime) * 30.0f}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
     shaderSetMatrix4(shaderProgram, "view", view);
 
     // Sun

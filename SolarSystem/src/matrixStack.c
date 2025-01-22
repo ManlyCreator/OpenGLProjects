@@ -28,6 +28,5 @@ void mStackClear(MStack *stack) {
 }
 
 vec4 *mStackGet(MStack *stack) {
-  glm_mat4_print(stack->elements[stack->top - 1], stdout);
   return stack->elements[stack->top - 1];
 }
