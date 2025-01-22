@@ -16,6 +16,8 @@ float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
 
+// TODO: Process vertices as a one-dimensional float array as opposed to arrays of vectors
+
 int main(void) {
   double timeFactor;
   Shader shaderProgram;
@@ -23,6 +25,7 @@ int main(void) {
   mat4 view, model;
   GLFWwindow *window;
   Scene scene;
+  Sphere sphere;
   MStack stack = mStackInit();
 
   // GLFW
@@ -68,6 +71,9 @@ int main(void) {
 
   // Scene Setup
   scene = sceneInit(shaderProgram);
+
+  // Sphere
+  sphere = sphereInit(48);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
