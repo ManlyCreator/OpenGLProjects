@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 
 mat4 xRot(float rad);
 mat4 yRot(float rad);
@@ -11,12 +11,15 @@ uniform mat4 model;
 uniform float currentTime;
 
 layout (location = 0) in vec3 pos;
+layout (location = 1) in vec2 inTexCoords;
 
 out vec4 outCol;
+out vec2 texCoords;
 
 void main(void) {
   gl_Position = projection * view * model * vec4(pos, 1.0f);
   outCol = vec4(pos, 1.0f) * 0.5f + vec4(0.5f, 0.5f, 0.5f, 1.0f);
+  texCoords = inTexCoords;
 }
 
 mat4 xRot(float rad) {

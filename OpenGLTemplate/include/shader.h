@@ -12,4 +12,4 @@ void shaderSetFloat(Shader shader, const char *uniform, float value);
 void shaderSetVector3f(Shader shader, const char *uniform, vec3 value);
 void shaderSetMatrix4(Shader shader, const char *uniform, mat4 value);
 
-#endif // !SHADER_H
+#endif
