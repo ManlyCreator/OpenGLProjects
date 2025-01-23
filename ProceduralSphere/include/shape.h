@@ -5,14 +5,19 @@
 #include "shader.h"
 #include "texture.h"
 
+#define PI GLM_PI
+
 typedef struct {
   GLuint VAO;
+  GLuint VBO[4];
   Shader shader;
   Texture texture;
   /*** VERTEX DATA ***/
   // Scalars
-  int numVertices;
-  int numIndices;
+  long numVertices;
+  long numTextureCoords;
+  long numNormals;
+  long numIndices;
   // Arrays
   float *vertices; 
   float *textureCoordinates;
@@ -22,9 +27,10 @@ typedef struct {
   vec3 position;
   vec3 rotation;
   vec3 size;
-} _Shape;
+} Shape;
 
-void shapeSetData(_Shape *shape);
-void shapeDraw(_Shape shape);
+void shapeSetData(Shape *shape);
+void shapeDraw(Shape shape, mat4 model);
+void shapeTranslate(Shape shape, float *pos, float *rot, float *size, vec4 *model);
 
 #endif

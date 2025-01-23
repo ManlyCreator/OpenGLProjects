@@ -13,9 +13,11 @@ add_library(Sphere src/sphere.c)
 add_library(MatrixStack src/matrixStack.c)
 add_library(Utils src/utils.c)
 add_library(Shape src/shape.c)
+add_library(Cube src/cube.c)
+add_library(Pyramid src/pyramid.c)
 
 include_directories(include/)
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC PROJECT="${PROJECT_NAME}")
 
-target_link_libraries(${PROJECT_NAME} glad glfw3 GL m Shader Scene Sphere Utils Texture MatrixStack Shape)
+target_link_libraries(${PROJECT_NAME} glad glfw3 GL m Shader Scene Sphere Utils Texture MatrixStack Shape Cube Pyramid)

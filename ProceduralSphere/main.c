@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 // External Libraries
+#include "pyramid.h"
 #include "utils.h"
 
 #define WIDTH 1000
@@ -16,7 +17,7 @@ float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
 
-// TODO: Process vertices as a one-dimensional float array as opposed to arrays of vectors
+// TODO: Clean up project
 
 int main(void) {
   double timeFactor;
@@ -24,8 +25,9 @@ int main(void) {
   Texture sun, earth, moon;
   mat4 view, model;
   GLFWwindow *window;
-  Scene scene;
   Sphere sphere;
+  Cube cube;
+  Pyramid pyramid;
   MStack stack = mStackInit();
 
   // GLFW
@@ -69,11 +71,14 @@ int main(void) {
 
   glm_mat4_identity(model);
 
-  // Scene Setup
-  scene = sceneInit(shaderProgram);
-
   // Sphere
-  sphere = sphereInit(48);
+  sphere = sphereInit(20, 20, shaderProgram, 0);
+
+  // Cube
+  cube = cubeInit(shaderProgram, 0);
+
+  // Pyramid
+  pyramid = pyramidInit(shaderProgram, 0);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -92,34 +97,51 @@ int main(void) {
 
     // View
     glm_mat4_identity(view);
-    glm_lookat((vec3){sin(currentTime) * 20.0f, cameraY, cos(currentTime) * 20.0f}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
+    glm_lookat((vec3){cameraX, cameraY, cameraZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
     shaderSetMatrix4(shaderProgram, "view", view);
 
+    // Cube
+    glm_vec3_copy((vec3){-5.0f, 5.0f, 0.0f}, cube.position);
+    glm_vec3_copy((vec3){currentTime * 20.0f, currentTime * 20.0f, 0.0f}, cube.rotation);
+    glm_vec3_copy((vec3){1.5f, 1.5f, 1.5f}, cube.size);
+    shapeTranslate(cube, cube.position, cube.rotation, cube.size, model);
+    shapeDraw(cube, model);
+
+    // Pyramid
+    glm_vec3_copy((vec3){-5.0f, -5.0f, 0.0f}, pyramid.position);
+    glm_vec3_copy((vec3){0.0f, currentTime * 20.0f, 0.0f}, pyramid.rotation);
+    glm_vec3_copy((vec3){1.0f, 1.0f, 1.0f}, pyramid.size);
+    shapeTranslate(pyramid, pyramid.position, pyramid.rotation, pyramid.size, model);
+    shapeDraw(pyramid, model);
+
     // Sun
-    scene.cube.texture = sun;
+    sphere.texture = sun;
+    glm_mat4_identity(model);
     mStackPush(&stack, model);
     glm_translate(mStackGet(&stack), (vec3){0.0f, 0.0f, 0.0f});
     mStackPush(&stack, mStackGet(&stack));
-    glm_rotate(mStackGet(&stack), currentTime, (vec3){1.0f, 1.0f, 0.0f});
-    sceneDraw(scene, CUBE, mStackGet(&stack));
+    glm_rotate(mStackGet(&stack), currentTime, (vec3){0.0f, 1.0f, 0.0f});
+    glm_scale(mStackGet(&stack), (vec3){2.0f, 2.0f, 2.0f});
+    shapeDraw(sphere, mStackGet(&stack));
     mStackPop(&stack, NULL);
 
     // Earth
-    scene.cube.texture = earth;
+    sphere.texture = earth;
     mStackPush(&stack, mStackGet(&stack));
     glm_translate(mStackGet(&stack), (vec3){5.0f, 0.0f, 0.0f});
+    glm_rotate(mStackGet(&stack), currentTime, (vec3){1.0f, 1.0f, 0.0f});
     mStackPush(&stack, mStackGet(&stack));
-    glm_rotate(mStackGet(&stack), sin(currentTime), (vec3){1.0f, 0.0f, 0.0f});
-    sceneDraw(scene, CUBE, mStackGet(&stack));
+    glm_scale(mStackGet(&stack), (vec3){1.5f, 1.5f, 1.5f});
+    shapeDraw(sphere, mStackGet(&stack));
     mStackPop(&stack, NULL);
 
     // Moon
-    scene.pyramid.texture = moon;
+    sphere.texture = moon;
     mStackPush(&stack, mStackGet(&stack));
-    glm_translate(mStackGet(&stack), (vec3){sin(currentTime) * 2.0f, cos(currentTime) * 2.0f, sin(currentTime) * 2.0f});
+    glm_translate(mStackGet(&stack), (vec3){sin(currentTime * 0.5) * 2.0f, cos(currentTime * 0.5) * 2.0f, sin(currentTime * 0.5) * 2.0f});
     glm_rotate(mStackGet(&stack), currentTime, (vec3){0.0f, 1.0f, 0.0f});
     glm_scale(mStackGet(&stack), (vec3){0.5f, 0.5f, 0.5f});
-    sceneDraw(scene, PYRAMID, mStackGet(&stack));
+    shapeDraw(sphere, mStackGet(&stack));
 
     mStackClear(&stack);
 
