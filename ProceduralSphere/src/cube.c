@@ -107,6 +107,8 @@ Cube cubeInit(Shader shader, Texture texture) {
 
   cube.vertices = malloc(sizeof(vertices));
   cube.textureCoordinates = malloc(sizeof(textureCoords));
+  cube.normals = NULL;
+  cube.indices = NULL;
   memcpy(cube.vertices, vertices, sizeof(vertices));
   memcpy(cube.textureCoordinates, textureCoords, sizeof(textureCoords));
 

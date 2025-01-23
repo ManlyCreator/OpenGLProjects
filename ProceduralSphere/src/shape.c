@@ -25,10 +25,10 @@ void shapeSetData(Shape *shape) {
   }
 
   // Indices
+  shape->EBO = 0;
   if (shape->numIndices) {
-    GLuint EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glGenBuffers(1, &shape->EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape->EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->numIndices * sizeof(unsigned), shape->indices, GL_STATIC_DRAW);
   }
 
@@ -45,6 +45,8 @@ void shapeSetData(Shape *shape) {
 void shapeDraw(Shape shape, mat4 model) {
   shaderUse(shape.shader);
   glBindVertexArray(shape.VAO);
+  if (shape.EBO)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.EBO);
 
   // Transform
   shaderSetMatrix4(shape.shader, "model", model);
@@ -81,6 +83,8 @@ void shapeDraw(Shape shape, mat4 model) {
   glActiveTexture(0);
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  if (shape.EBO)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
 
@@ -95,4 +99,24 @@ void shapeTranslate(Shape shape, float *pos, float *rot, float *size, vec4 *mode
   }
   if (size)
     glm_scale(model, size);
+}
+
+void shapeDelete(Shape *shape) {
+  glDeleteBuffers(4, shape->VBO);
+  glDeleteBuffers(1, &shape->EBO);
+  glDeleteVertexArrays(1, &shape->VAO);
+  glDeleteTextures(1, &shape->texture);
+  glDeleteShader(shape->shader);
+  if (shape->vertices) {
+    free(shape->vertices);
+  }
+  if (shape->textureCoordinates) {
+    free(shape->textureCoordinates);
+  }
+  if (shape->normals) {
+    free(shape->normals);
+  }
+  if (shape->indices) {
+    free(shape->indices);
+  }
 }

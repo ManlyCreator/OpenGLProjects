@@ -2,9 +2,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+// OpenGL Libs
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 // External Libraries
+#include "matrixStack.h"
+#include "shape.h"
 #include "pyramid.h"
-#include "utils.h"
+#include "cube.h"
+#include "sphere.h"
 
 #define WIDTH 1000
 #define HEIGHT 1000
@@ -151,6 +158,9 @@ int main(void) {
   }
 
   // Clean-Up
+  shapeDelete(&sphere);
+  shapeDelete(&cube);
+  shapeDelete(&pyramid);
   glfwTerminate();
 
   return 0;

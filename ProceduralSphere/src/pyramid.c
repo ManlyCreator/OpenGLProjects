@@ -69,6 +69,8 @@ Pyramid pyramidInit(Shader shader, Texture texture) {
 
   pyramid.vertices = malloc(sizeof(vertices));
   pyramid.textureCoordinates = malloc(sizeof(textureCoords));
+  pyramid.normals = NULL;
+  pyramid.indices = NULL;
   memcpy(pyramid.vertices, vertices, sizeof(vertices));
   memcpy(pyramid.textureCoordinates, textureCoords, sizeof(textureCoords));
 

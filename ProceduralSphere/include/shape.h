@@ -9,6 +9,7 @@
 
 typedef struct {
   GLuint VAO;
+  GLuint EBO;
   GLuint VBO[4];
   Shader shader;
   Texture texture;
@@ -32,5 +33,6 @@ typedef struct {
 void shapeSetData(Shape *shape);
 void shapeDraw(Shape shape, mat4 model);
 void shapeTranslate(Shape shape, float *pos, float *rot, float *size, vec4 *model);
+void shapeDelete(Shape *shape);
 
 #endif
