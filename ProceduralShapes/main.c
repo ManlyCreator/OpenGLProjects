@@ -24,6 +24,11 @@ float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
 
+// TODO: Pass textures and shaders by reference so they can properly be deleted in main
+// TODO: Draw lines on the sphere
+// TODO: Icosphere
+// TODO: Cubesphere
+
 int main(void) {
   double timeFactor;
   Shader shaderProgram;
@@ -73,7 +78,7 @@ int main(void) {
   glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 200.0f, projection);
 
   // Sphere
-  sphere = sphereInit(3, 3, shaderProgram, moon);
+  sphere = sphereInit(10, 10, shaderProgram, moon);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);

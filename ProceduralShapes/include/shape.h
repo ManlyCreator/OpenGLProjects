@@ -8,6 +8,7 @@
 #define PI GLM_PI
 
 typedef struct {
+  /*** OPENGL DATA ***/
   GLuint VAO;
   GLuint EBO;
   GLuint VBO[4];
@@ -23,7 +24,7 @@ typedef struct {
   float *vertices; 
   float *textureCoordinates;
   float *normals;
-  int *indices;
+  unsigned *indices;
   /*** TRANSFORM DATA ***/
   vec3 position;
   vec3 rotation;
