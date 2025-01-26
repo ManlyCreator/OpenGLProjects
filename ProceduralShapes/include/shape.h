@@ -12,8 +12,8 @@ typedef struct {
   GLuint VAO;
   GLuint EBO;
   GLuint VBO[4];
-  Shader shader;
-  Texture texture;
+  Shader *shader;
+  Texture *texture;
   /*** VERTEX DATA ***/
   // Scalars
   long numVertices;

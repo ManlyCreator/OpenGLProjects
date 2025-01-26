@@ -1,5 +1,5 @@
 # Minimum CMake
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.25)
 
 # Project Name
 project(ProceduralShapes)
@@ -7,18 +7,28 @@ project(ProceduralShapes)
 # Project Settings
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Functions
+
 # Compile Executable
 add_executable(${PROJECT_NAME} main.c)
 
 # Compile Libraries
-add_library(Shader src/shader.c)
-add_library(Texture src/texture.c)
-add_library(Sphere src/sphere.c)
-add_library(MatrixStack src/matrixStack.c)
-add_library(Shape src/shape.c)
-add_library(Cube src/cube.c)
-add_library(Pyramid src/pyramid.c)
-set(Dependencies Shader Texture Sphere MatrixStack Shape Cube Pyramid)
+set(Dependencies)
+
+function(create_library library src libraryList)
+  add_library(${library} src/${src})
+  list(APPEND ${libraryList} ${library})
+  return(PROPAGATE ${libraryList})
+endfunction()
+
+create_library(Shader shader.c Dependencies)
+create_library(Texture texture.c Dependencies)
+create_library(Sphere sphere.c Dependencies)
+create_library(MatrixStack matrixStack.c Dependencies)
+create_library(Shape shape.c Dependencies)
+create_library(Cube cube.c Dependencies)
+create_library(Pyramid pyramid.c Dependencies)
+create_library(Torus torus.c Dependencies)
 
 # Include Directory
 include_directories(include/)
@@ -28,3 +38,4 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC PROJECT="${PROJECT_NAME}")
 
 # Links Libraries
 target_link_libraries(${PROJECT_NAME} glad glfw3 GL m ${Dependencies})
+

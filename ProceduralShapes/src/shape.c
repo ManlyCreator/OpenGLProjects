@@ -43,13 +43,11 @@ void shapeSetData(Shape *shape) {
 }
 
 void shapeDraw(Shape shape, mat4 model) {
-  shaderUse(shape.shader);
+  shaderUse(*shape.shader);
   glBindVertexArray(shape.VAO);
-  if (shape.EBO)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.EBO);
 
   // Transform
-  shaderSetMatrix4(shape.shader, "model", model);
+  shaderSetMatrix4(*shape.shader, "model", model);
 
   // Vertices
   glBindBuffer(GL_ARRAY_BUFFER, shape.VBO[0]);
@@ -62,16 +60,17 @@ void shapeDraw(Shape shape, mat4 model) {
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
 
   if (shape.texture) {
-    shaderSetInt(shape.shader, "textureFlag", 1);
-    textureUse(shape.texture);
+    shaderSetInt(*shape.shader, "textureFlag", 1);
+    textureUse(*shape.texture);
   } else {
-    shaderSetInt(shape.shader, "textureFlag", 0);
+    shaderSetInt(*shape.shader, "textureFlag", 0);
   }
 
   // Draw
-  if (shape.numIndices)
+  if (shape.numIndices) {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.EBO);
     glDrawElements(GL_TRIANGLES, shape.numIndices, GL_UNSIGNED_INT, (void*)0);
-  else
+  } else
     glDrawArrays(GL_TRIANGLES, 0, shape.numVertices);
 
   // Set Transform Data
@@ -105,18 +104,15 @@ void shapeDelete(Shape *shape) {
   glDeleteBuffers(4, shape->VBO);
   glDeleteBuffers(1, &shape->EBO);
   glDeleteVertexArrays(1, &shape->VAO);
-  glDeleteTextures(1, &shape->texture);
-  glDeleteShader(shape->shader);
-  if (shape->vertices) {
+  glDeleteShader(*shape->shader);
+  if (shape->texture)
+    glDeleteTextures(1, shape->texture);
+  if (shape->vertices)
     free(shape->vertices);
-  }
-  if (shape->textureCoordinates) {
+  if (shape->textureCoordinates)
     free(shape->textureCoordinates);
-  }
-  if (shape->normals) {
+  if (shape->normals)
     free(shape->normals);
-  }
-  if (shape->indices) {
+  if (shape->indices)
     free(shape->indices);
-  }
 }

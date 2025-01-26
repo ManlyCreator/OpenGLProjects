@@ -1,7 +1,7 @@
 #include "sphere.h"
 #include "shape.h"
 
-Sphere sphereInit(int stackCount, int sectorCount, Shader shader, Texture texture) {
+Sphere sphereInit(int stackCount, int sectorCount, Shader *shader, Texture *texture) {
   Sphere sphere;
 
   int s1, s2;
@@ -55,6 +55,8 @@ Sphere sphereInit(int stackCount, int sectorCount, Shader shader, Texture textur
   }
 
   // Map Out Indices
+  int s1UpperBound, s1LowerBound;
+  int s2UpperBound, s2LowerBound;
   for (int i = 0; i < stackCount; i++) {
     s1 = i * (sectorCount + 1);
     s2 = s1 + sectorCount + 1;

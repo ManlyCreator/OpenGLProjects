@@ -6,6 +6,6 @@
 
 typedef Shape Sphere;
 
-Sphere sphereInit(int stackCount, int sectorCount, Shader shader, Texture texture);
+Sphere sphereInit(int stackCount, int sectorCount, Shader *shader, Texture *texture);
 
 #endif
