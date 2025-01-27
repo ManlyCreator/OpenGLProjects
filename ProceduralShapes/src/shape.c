@@ -3,6 +3,7 @@
 #include "texture.h"
 
 void shapeSetData(Shape *shape) {
+  printf("Processing Data\n");
   // VAO
   glGenVertexArrays(1, &shape->VAO);
   glBindVertexArray(shape->VAO);
@@ -68,11 +69,14 @@ void shapeDraw(Shape shape, mat4 model) {
 
   // Draw
   if (shape.numIndices) {
+    printf("Drawing from EBO\n");
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.EBO);
+    printf("EBO: %u\n", shape.EBO);
     glDrawElements(GL_TRIANGLES, shape.numIndices, GL_UNSIGNED_INT, (void*)0);
   } else
     glDrawArrays(GL_TRIANGLES, 0, shape.numVertices);
 
+  printf("Passed Draw\n");
   // Set Transform Data
   glm_vec3_copy((vec3){0.0f, 0.0f, 0.0f}, shape.position);
   glm_vec3_copy((vec3){0.0f, 0.0f, 0.0f}, shape.rotation);
@@ -83,6 +87,7 @@ void shapeDraw(Shape shape, mat4 model) {
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   if (shape.EBO)
+    printf("Unbinding EBO\n");
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }

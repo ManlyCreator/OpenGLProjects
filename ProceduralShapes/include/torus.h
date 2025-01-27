@@ -5,6 +5,6 @@
 
 typedef Shape Torus;
 
-Torus torusInit(int rings, Shader shader, Texture texture);
+Torus torusInit(int rings, Shader *shader, Texture *texture);
 
 #endif
