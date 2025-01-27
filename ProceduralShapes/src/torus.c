@@ -11,6 +11,9 @@ Torus torusInit(int rings, Shader *shader, Texture *texture) {
   float v1, v2;
   float angleStep = 2 * PI / rings;
 
+  mat4 ringMat;
+  vec4 ringVec;
+
   torus.numVertices = 0;
   torus.numTextureCoords = 0;
   torus.numNormals = 0;
@@ -19,7 +22,7 @@ Torus torusInit(int rings, Shader *shader, Texture *texture) {
   torus.vertices = malloc((rings + 1) * (rings + 1) * 3 * sizeof(float));
   torus.textureCoordinates = malloc((rings + 1) * (rings + 1) * 2 * sizeof(float));
   torus.normals = malloc((rings + 1) * (rings + 1) * 3 * sizeof(float));
-  torus.indices = malloc(rings * rings * 6 * sizeof(unsigned));
+  torus.indices = malloc(rings * rings * 6 * 3 * sizeof(unsigned));
 
   for (int i = 0; i <= rings; i++) {
     hAngle = i * angleStep;
@@ -29,13 +32,16 @@ Torus torusInit(int rings, Shader *shader, Texture *texture) {
       // Vertices
       vAngle = j * angleStep;
 
-      x = cos(vAngle) + originX;
-      y = sin(vAngle);
-      z = originZ;
+      glm_vec4_copy((vec4){cos(vAngle) + originX, sin(vAngle), originZ}, ringVec);
+      /*glm_vec3_rotate(ringVec, hAngle, (vec3){0.0f, 1.0f, 0.0f});*/
 
-      torus.vertices[torus.numVertices++] = x;
-      torus.vertices[torus.numVertices++] = y;
-      torus.vertices[torus.numVertices++] = z;
+      /*x = cos(vAngle) + originX;*/
+      /*y = sin(vAngle);*/
+      /*z = originZ;*/
+
+      torus.vertices[torus.numVertices++] = ringVec[0];
+      torus.vertices[torus.numVertices++] = ringVec[1];
+      torus.vertices[torus.numVertices++] = ringVec[2];
 
       // Texture Coordinates
       s = (float)i / rings;
@@ -59,6 +65,8 @@ Torus torusInit(int rings, Shader *shader, Texture *texture) {
     }
   }
 
+  printf("Num Vertices: %lu\n", torus.numVertices);
+  printf("Num Indices: %lu\n", torus.numIndices);
   printf("Setting Data\n");
   shapeSetData(&torus);
   printf("Set Data\n");

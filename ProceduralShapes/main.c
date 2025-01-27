@@ -25,8 +25,7 @@ float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
 
-// TODO: Debug invalid malloc() error
-// TODO: Correctly translate each ring's coordinates
+// TODO: Rotate each ring of the Torus to match the horizontal rotation
 
 int main(void) {
   double timeFactor;
@@ -81,7 +80,7 @@ int main(void) {
   sphere = sphereInit(10, 10, &shaderProgram, NULL);
 
   // Torus
-  torus = torusInit(10, &shaderProgram, NULL);
+  torus = torusInit(10, &shaderProgram, &moon);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -105,8 +104,9 @@ int main(void) {
 
     // Sphere
     glm_mat4_identity(model);
-    glm_translate(model, (vec3){0.0f, 0.0f, 0.0f});
+    glm_translate(model, (vec3){0.0f, 0.0f, 3.0f});
     glm_rotate(model, currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});
+    glm_rotate(model, glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
     glm_scale(model, (vec3){2.0f, 2.0f, 2.0f});
     /*shapeDraw(sphere, model);*/
     shapeDraw(torus, model);

@@ -34,6 +34,9 @@ Sphere sphereInit(int stackCount, int sectorCount, Shader shader, Texture textur
       x = (float)(xz * sin(sectorAngle));
       y = (float)(sin(stackAngle));
       z = (float)(xz * cos(sectorAngle)); 
+      printf("x: %f\n", x);
+      printf("y: %f\n", y);
+      printf("z: %f\n", z);
 
       // Texture Coordinates
       s = (float)j / sectorCount;
