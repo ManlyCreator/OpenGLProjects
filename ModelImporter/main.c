@@ -23,10 +23,6 @@ float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
 
-// TODO: Parse the file once to allocate enough space for enough attribute
-// TODO: Store attribute data in struct
-// TODO: Render model
-
 int main(void) {
   double timeFactor;
   Shader shaderProgram;
@@ -78,7 +74,7 @@ int main(void) {
   glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 200.0f, projection);
 
   // Model
-  object = modelParse("../objs/shuttle.obj");
+  object = modelParse("../models/icosphere.obj");
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);

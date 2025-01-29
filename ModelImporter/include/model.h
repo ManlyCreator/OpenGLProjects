@@ -1,6 +1,8 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#define LINE_LEN 100
+
 typedef struct {
   unsigned long numVertices;
   unsigned long numTextureCoords;
