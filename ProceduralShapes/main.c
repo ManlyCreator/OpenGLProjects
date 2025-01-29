@@ -25,12 +25,13 @@ float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
 
-// TODO: Rotate each ring of the Torus to match the horizontal rotation
+// TODO: Understand and map out normal coordinates
+// TODO: Add separate parameters for inner & ring radius
 
 int main(void) {
   double timeFactor;
   Shader shaderProgram;
-  Texture sun, earth, moon;
+  Texture sun, earth, moon, checkerboard;
   mat4 view, model;
   GLFWwindow *window;
   Sphere sphere;
@@ -68,6 +69,8 @@ int main(void) {
     return -1;
   if (!(moon = textureLoad("../textures/moon.jpg")))
     return -1;
+  if (!(checkerboard = textureLoad("../textures/checkerboard.jpg")))
+    return -1;
   // Shader
   if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
     return -1;
@@ -80,7 +83,7 @@ int main(void) {
   sphere = sphereInit(10, 10, &shaderProgram, NULL);
 
   // Torus
-  torus = torusInit(10, &shaderProgram, &moon);
+  torus = torusInit(10, 10, 3.0f, 1.0f, &shaderProgram, &checkerboard);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -107,7 +110,7 @@ int main(void) {
     glm_translate(model, (vec3){0.0f, 0.0f, 3.0f});
     glm_rotate(model, currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});
     glm_rotate(model, glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
-    glm_scale(model, (vec3){2.0f, 2.0f, 2.0f});
+    glm_scale(model, (vec3){1.0f, 1.0f, 1.0f});
     /*shapeDraw(sphere, model);*/
     shapeDraw(torus, model);
 
