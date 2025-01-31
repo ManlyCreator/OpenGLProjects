@@ -15,8 +15,12 @@ void setData(Model *model);
 Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
   Model model;
   float x, y, z;
+  unsigned numVerts = 0, numTex = 0, numNormals = 0;
   unsigned indexV, indexVT, indexVN;
-  size_t vBytes = 10, vtBytes = 10, vnBytes = 10, fBytes = 10;
+  size_t vBytes = 10, vtBytes = 10, vnBytes = 10;
+  size_t model_vBytes = 10, model_vtBytes = 10, model_vnBytes = 10;
+  /*float *vertValues, *texValues, *normalValues;*/
+  vec3 *vertValues, *texValues, *normalValues;
   char line[BUF_SIZE];
   char fieldBuffer[BUF_SIZE];
   char *linePtr;
@@ -33,37 +37,73 @@ Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
   model.numVertices = 0;
   model.numTextureCoords = 0;
   model.numNormals = 0;
-  model.numIndices = 0;
 
-  model.vertices = calloc(vBytes, sizeof(float));
-  model.textureCoords = calloc(vtBytes, sizeof(float));
-  model.normals = calloc(vnBytes, sizeof(float));
-  model.indices = calloc(fBytes, sizeof(unsigned));
+  model.vertices = calloc(model_vBytes, sizeof(float));
+  model.normals = calloc(model_vnBytes, sizeof(float));
+  model.textureCoords = calloc(model_vtBytes, sizeof(float));
+  vertValues = calloc(vBytes, sizeof(vec3));
+  normalValues = calloc(vnBytes, sizeof(vec3));
+  texValues = calloc(vtBytes, sizeof(vec3));
 
   while (fgets(line, BUF_SIZE, src)) {
-    // Vertices
+    // Vertex Values
     if (line[0] == 'v' && line[1] == ' ') {
       // Realloc
-      if (model.numVertices + 3 > vBytes)
-        model.vertices = realloc(model.vertices, (vBytes *= 2) * sizeof(float));
+      if (numVerts + 3 > vBytes)
+        vertValues = realloc(vertValues, (vBytes *= 2) * sizeof(vec3));
       sscanf(line, "v %f %f %f\n", &x, &y, &z);
-      model.vertices[model.numVertices++] = x;
-      model.vertices[model.numVertices++] = y;
-      model.vertices[model.numVertices++] = z;
+      vertValues[numVerts][0] = x;
+      vertValues[numVerts][1] = y;
+      vertValues[numVerts][2] = z;
+      numVerts++;
+    }
+
+    // Normal Values
+    if (line[0] == 'v' && line[1] == 'n') {
+      // Realloc
+      if (numNormals + 3 > vnBytes)
+        normalValues = realloc(normalValues, (vnBytes *= 2) * sizeof(vec3));
+      sscanf(line, "vn %f %f %f\n", &x, &y, &z);
+      normalValues[numNormals][0] = x;
+      normalValues[numNormals][1] = y;
+      normalValues[numNormals][2] = z;
+      numNormals++;
+    }
+
+    // Texture Values
+    if (line[0] == 'v' && line[1] == 't') {
+      // Realloc
+      if (numTex + 2 > vtBytes)
+        texValues = realloc(texValues, (vtBytes *= 2) * sizeof(vec3));
+      sscanf(line, "vt %f %f\n", &x, &y);
+      texValues[numTex][0] = x;
+      texValues[numTex][1] = y;
+      numTex++;
     }
 
     // Indices
+    /*model.textureCoords = calloc(vtBytes, sizeof(float));*/
+    /*model.normals = calloc(vnBytes, sizeof(float));*/
     if (line[0] == 'f' && line[1] == ' ') {
-      if (model.numIndices + strlen(line) - 2 > fBytes)
-        model.indices = realloc(model.indices, (fBytes *= 2) * sizeof(float));
       int j = 0;
       for (linePtr = &line[2]; linePtr < line + strlen(line); linePtr++) {
         if (*linePtr == ' ' || *linePtr == '\n') {
+          if (model.numVertices + 3 > model_vBytes)
+            model.vertices = realloc(model.vertices, (model_vBytes *= 2) * sizeof(float));
+          if (model.numNormals + 3 > model_vnBytes)
+            model.normals = realloc(model.normals, (model_vnBytes *= 2) * sizeof(float));
+          if (model.numTextureCoords + 2 > model_vtBytes)
+            model.textureCoords = realloc(model.textureCoords, (model_vtBytes *= 2) * sizeof(float));
           fieldBuffer[j] = '\0';
           sscanf(fieldBuffer, "%u/%u/%u", &indexV, &indexVT, &indexVN);
-          printf("%s\n", fieldBuffer);
-          printf("Vertex Index: %u\n", indexV);
-          model.indices[model.numIndices++] = indexV - 1;
+          model.vertices[model.numVertices++] = vertValues[indexV - 1][0];
+          model.vertices[model.numVertices++] = vertValues[indexV - 1][1];
+          model.vertices[model.numVertices++] = vertValues[indexV - 1][2];
+          model.normals[model.numNormals++] = normalValues[indexVN - 1][0];
+          model.normals[model.numNormals++] = normalValues[indexVN - 1][1];
+          model.normals[model.numNormals++] = normalValues[indexVN - 1][2];
+          model.textureCoords[model.numTextureCoords++] = texValues[indexVT - 1][0];
+          model.textureCoords[model.numTextureCoords++] = texValues[indexVT - 1][1];
           j = 0;
         } else {
           fieldBuffer[j] = *linePtr;
@@ -72,69 +112,12 @@ Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
       }
     }
   }
-  // File Reading Loop
-  /*while (1) {*/
-  /*  // Reads the line's attribute*/
-  /*  readAttribute(attribute, src);*/
-  /**/
-  /*  // Breaks if an invalid line is read*/
-  /*  if (strcmp(attribute, "v") && strcmp(attribute, "vt") && strcmp(attribute, "vn") && strcmp(attribute, "f")) */
-  /*    break;*/
-  /**/
-  /*  // Vertex Coordinates*/
-  /*  if (!strcmp(attribute, "v")) {*/
-  /*    printf("Reading Vertex\n");*/
-  /*    // Realloc*/
-  /*    if (model.numVertices + 3 > vBytes)*/
-  /*      model.vertices = realloc(model.vertices, (vBytes *= 2) * sizeof(float));*/
-  /*    fscanf(src, " %f", &model.vertices[model.numVertices++]);*/
-  /*    fscanf(src, " %f", &model.vertices[model.numVertices++]);*/
-  /*    fscanf(src, " %f\n", &model.vertices[model.numVertices++]);*/
-  /*  }*/
-  /**/
-  /*  // Normals*/
-  /*  if (!strcmp(attribute, "vn")) {*/
-  /*    printf("Reading Normal\n");*/
-  /*    // Realloc*/
-  /*    if (model.numNormals + 3 > vnBytes)*/
-  /*      model.normals = realloc(model.normals, (vnBytes *= 2) * sizeof(float));*/
-  /*    fscanf(src, " %f", &model.normals[model.numNormals++]);*/
-  /*    fscanf(src, " %f", &model.normals[model.numNormals++]);*/
-  /*    fscanf(src, " %f\n", &model.normals[model.numNormals++]);*/
-  /*  }*/
-  /**/
-  /*  // Texture Coordinates*/
-  /*  if (!strcmp(attribute, "vt")) {*/
-  /*    printf("Reading Texture\n");*/
-  /*    // Realloc*/
-  /*    if (model.numTextureCoords + 2 > vtBytes)*/
-  /*      model.textureCoords = realloc(model.textureCoords, (vtBytes *= 2) * sizeof(float));*/
-  /*    fscanf(src, " %f", &model.textureCoords[model.numTextureCoords++]);*/
-  /*    fscanf(src, " %f\n", &model.textureCoords[model.numTextureCoords++]);*/
-  /*  }*/
-  /**/
-  /*  // Indices*/
-  /*  if (!strcmp(attribute, "f")) {*/
-  /*    printf("f %c\n", c = fgetc(src));*/
-  /*    ungetc(c, src);*/
-  /*  }*/
-  /**/
-  /*  // Breaks if the next character is EOF*/
-  /*  /*printf("Next Character: %d\n", c = fgetc(src));*/
-  /*  /*ungetc(c, src);*/
-  /*  /*if ((c = fgetc(src)) == EOF)*/
-  /*  /*  break;*/
-  /*  /*ungetc(c, src);*/
-  /*}*/
 
   // Reallocates each attribute to match the exact number of elements
   model.vertices = realloc(model.vertices, model.numVertices * sizeof(float));
   model.normals = realloc(model.normals, model.numNormals * sizeof(float));
   model.textureCoords = realloc(model.textureCoords, model.numTextureCoords * sizeof(float));
-  model.indices = realloc(model.indices, model.numIndices * sizeof(unsigned));
   
-  printf("Vertices: %lu\n", model.numVertices);
-
   model.shader = shader;
   model.texture = texture;
 
@@ -144,6 +127,8 @@ Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
 }
 
 void setData(Model *model) {
+  printf("Setting Data\n");
+  printf("Vertices: %lu\n", model->numVertices);
   glGenVertexArrays(1, &model->VAO);
   glBindVertexArray(model->VAO);
 
@@ -152,11 +137,6 @@ void setData(Model *model) {
   // Vertices
   glBindBuffer(GL_ARRAY_BUFFER, model->VBO[0]);
   glBufferData(GL_ARRAY_BUFFER, model->numVertices * sizeof(float), model->vertices, GL_STATIC_DRAW);
-
-  // Indices
-  glGenBuffers(1, &model->EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->numIndices * sizeof(unsigned), model->indices, GL_STATIC_DRAW);
 
   // Texture
   if (model->numTextureCoords) {
@@ -187,7 +167,6 @@ void modelDraw(Model model, mat4 transform) {
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
-
   // Texture
   if (model.texture) {
     glBindBuffer(GL_ARRAY_BUFFER, model.VBO[1]);
@@ -200,8 +179,8 @@ void modelDraw(Model model, mat4 transform) {
   }
 
   // Draw
-  /*glDrawArrays(GL_TRIANGLES, 0, model.numVertices);*/
-  glDrawElements(GL_TRIANGLES, model.numIndices, GL_UNSIGNED_INT, (void *)0);
+  glDrawArrays(GL_TRIANGLES, 0, model.numVertices);
+  /*glDrawElements(GL_TRIANGLES, model.numIndices, GL_UNSIGNED_INT, (void *)0);*/
 
   /*// Set Transform Data*/
   /*glm_vec3_copy((vec3){0.0f, 0.0f, 0.0f}, shape.position);*/

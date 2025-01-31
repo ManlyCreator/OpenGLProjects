@@ -10,17 +10,14 @@
 typedef struct {
   GLuint VAO;
   GLuint VBO[3];
-  GLuint EBO;
   GLuint *shader;
   GLuint *texture;
   unsigned long numVertices;
   unsigned long numTextureCoords;
   unsigned long numNormals;
-  unsigned long numIndices;
   float *vertices;
   float *textureCoords;
   float *normals;
-  unsigned *indices;
 } Model;
 
 // Stores model data in Model struct
