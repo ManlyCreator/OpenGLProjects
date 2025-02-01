@@ -9,9 +9,6 @@
 
 void setData(Model *model);
 
-// TODO: Create separate arrays to store read attributes
-// TODO: Index temp arrays using the f attribute to store them in their respective struct array
-
 Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
   Model model;
   float x, y, z;
@@ -19,7 +16,6 @@ Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
   unsigned indexV, indexVT, indexVN;
   size_t vBytes = 10, vtBytes = 10, vnBytes = 10;
   size_t model_vBytes = 10, model_vtBytes = 10, model_vnBytes = 10;
-  /*float *vertValues, *texValues, *normalValues;*/
   vec3 *vertValues, *texValues, *normalValues;
   char line[BUF_SIZE];
   char fieldBuffer[BUF_SIZE];
@@ -82,8 +78,6 @@ Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
     }
 
     // Indices
-    /*model.textureCoords = calloc(vtBytes, sizeof(float));*/
-    /*model.normals = calloc(vnBytes, sizeof(float));*/
     if (line[0] == 'f' && line[1] == ' ') {
       int j = 0;
       for (linePtr = &line[2]; linePtr < line + strlen(line); linePtr++) {
@@ -127,8 +121,6 @@ Model modelInit(const char *objFile, Shader *shader, Texture *texture) {
 }
 
 void setData(Model *model) {
-  printf("Setting Data\n");
-  printf("Vertices: %lu\n", model->numVertices);
   glGenVertexArrays(1, &model->VAO);
   glBindVertexArray(model->VAO);
 
@@ -180,12 +172,6 @@ void modelDraw(Model model, mat4 transform) {
 
   // Draw
   glDrawArrays(GL_TRIANGLES, 0, model.numVertices);
-  /*glDrawElements(GL_TRIANGLES, model.numIndices, GL_UNSIGNED_INT, (void *)0);*/
-
-  /*// Set Transform Data*/
-  /*glm_vec3_copy((vec3){0.0f, 0.0f, 0.0f}, shape.position);*/
-  /*glm_vec3_copy((vec3){0.0f, 0.0f, 0.0f}, shape.rotation);*/
-  /*glm_vec3_copy((vec3){1.0f, 1.0f, 1.0f}, shape.size);*/
 
   // Reset
   glActiveTexture(0);
