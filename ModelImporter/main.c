@@ -74,7 +74,7 @@ int main(void) {
   glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 200.0f, projection);
 
   // Model
-  object = modelInit("../models/shuttle.obj", &shaderProgram, &moon);
+  object = modelInit("../models/man.obj", &shaderProgram, NULL);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -99,10 +99,10 @@ int main(void) {
     // Model
     glm_mat4_identity(model);
     glm_translate(model, (vec3){0.0f, 0.0f, 3.0f});
-    glm_rotate(model, currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});
-    glm_rotate(model, glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
-    glm_scale(model, (vec3){0.25f, 0.25f, 0.25f});
-    /*glm_scale(model, (vec3){1.0f, 1.0f, 1.0f});*/
+    /*glm_rotate(model, currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});*/
+    /*glm_rotate(model, glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});*/
+    /*glm_scale(model, (vec3){0.25f, 0.25f, 0.25f});*/
+    glm_scale(model, (vec3){1.0f, 1.0f, 1.0f});
     modelDraw(object, model);
 
     // Poll Events & Swap Buffers
