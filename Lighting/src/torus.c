@@ -29,16 +29,19 @@ Torus torusInit(int rings, int stacks, float insideRadius, float ringRadius, Sha
 
     for (int j = 0; j <= stacks; j++) {
       ringAngle = PI - j * ringAngleStep;
-      // TODO:
-      // Normals
 
+      // Normals
       xz = ringRadius * cos(ringAngle);
       x = xz * cos(insideAngle);
+      y = sin(ringAngle);
       z = xz * sin(insideAngle);
+
+      nx = x * radiusInv; 
+      ny = y * radiusInv; 
+      nz = z * radiusInv; 
 
       // Vertices
       x += insideRadius * cos(insideAngle);
-      y = sin(ringAngle);
       z += insideRadius * sin(insideAngle);
 
       torus.vertices[torus.numVertices++] = x;

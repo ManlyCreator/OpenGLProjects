@@ -79,7 +79,7 @@ int main(void) {
   glm_mat4_identity(model);
 
   // Sphere
-  sphere = sphereInit(20, 20, shaderProgram, 0);
+  sphere = sphereInit(2, 4, shaderProgram, 0);
 
   // Cube
   cube = cubeInit(shaderProgram, 0);

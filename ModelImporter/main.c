@@ -84,6 +84,7 @@ int main(void) {
   glfwSetKeyCallback(window, keyCallback);
   
   // Render Loop
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   while (!glfwWindowShouldClose(window)) {
     currentTime = glfwGetTime();
     // Render Commands
@@ -99,38 +100,43 @@ int main(void) {
     glm_lookat((vec3){cameraX, cameraY, cameraZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
     shaderSetMatrix4(shaderProgram, "view", view);
 
-    // Saturn
     glm_mat4_identity(model);
-    mStackPush(&stack, model);
-    glm_scale(mStackGet(&stack), (vec3){1.5f, 1.5f, 1.5f});
-    glm_translate(mStackGet(&stack), (vec3){0.0f, 0.0f, 0.0f});
-    mStackPush(&stack, mStackGet(&stack));
-    glm_rotate(mStackGet(&stack), currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});
-    glm_rotate(mStackGet(&stack), glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
-    mStackPush(&stack, mStackGet(&stack));
-    glm_rotate(mStackGet(&stack), currentTime * 0.5f, (vec3){0.0f, 1.0f, 0.0f});
-    shapeDraw(sphere, mStackGet(&stack));
-    mStackPop(&stack, NULL);
-
-    // Ring
-    mStackPush(&stack, mStackGet(&stack));
-    glm_rotate(mStackGet(&stack), -currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});
-    shapeDraw(torus, mStackGet(&stack));
-    mStackPop(&stack, NULL);
-
-    // Shuttle
-    mStackPop(&stack, NULL);
-    mStackPush(&stack, mStackGet(&stack));
-    glm_scale(mStackGet(&stack), (vec3){0.05f, 0.05f, 0.05f});
-    glm_rotate(mStackGet(&stack), glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
-    glm_rotate(mStackGet(&stack), glm_rad(currentTime * 100.0f), (vec3){0.0f, 1.0f, 0.0f});
-    glm_translate(mStackGet(&stack), (vec3){0, 0.0f, 60.0f});
-    glm_rotate(mStackGet(&stack), glm_rad(-90.0f), (vec3){0.0f, 1.0f, 0.0f});
-    modelDraw(object, mStackGet(&stack));
-
-
-    // Reset
-    mStackClear(&stack);
+    glm_scale(model, (vec3){0.5f, 0.5f, 0.5f});
+    glm_translate(model, (vec3){0.0f, 0.0f, 0.0f});
+    glm_rotate(model, currentTime * 1.0f, (vec3){1.0f, 1.0f, 0.0f});
+    modelDraw(object, model);
+    /*// Saturn*/
+    /*glm_mat4_identity(model);*/
+    /*mStackPush(&stack, model);*/
+    /*glm_scale(mStackGet(&stack), (vec3){1.5f, 1.5f, 1.5f});*/
+    /*glm_translate(mStackGet(&stack), (vec3){0.0f, 0.0f, 0.0f});*/
+    /*mStackPush(&stack, mStackGet(&stack));*/
+    /*glm_rotate(mStackGet(&stack), currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});*/
+    /*glm_rotate(mStackGet(&stack), glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});*/
+    /*mStackPush(&stack, mStackGet(&stack));*/
+    /*glm_rotate(mStackGet(&stack), currentTime * 0.5f, (vec3){0.0f, 1.0f, 0.0f});*/
+    /*shapeDraw(sphere, mStackGet(&stack));*/
+    /*mStackPop(&stack, NULL);*/
+    /**/
+    /*// Ring*/
+    /*mStackPush(&stack, mStackGet(&stack));*/
+    /*glm_rotate(mStackGet(&stack), -currentTime * 1.0f, (vec3){0.0f, 1.0f, 0.0f});*/
+    /*shapeDraw(torus, mStackGet(&stack));*/
+    /*mStackPop(&stack, NULL);*/
+    /**/
+    /*// Shuttle*/
+    /*mStackPop(&stack, NULL);*/
+    /*mStackPush(&stack, mStackGet(&stack));*/
+    /*glm_scale(mStackGet(&stack), (vec3){0.05f, 0.05f, 0.05f});*/
+    /*glm_rotate(mStackGet(&stack), glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});*/
+    /*glm_rotate(mStackGet(&stack), glm_rad(currentTime * 100.0f), (vec3){0.0f, 1.0f, 0.0f});*/
+    /*glm_translate(mStackGet(&stack), (vec3){0, 0.0f, 60.0f});*/
+    /*glm_rotate(mStackGet(&stack), glm_rad(-90.0f), (vec3){0.0f, 1.0f, 0.0f});*/
+    /*modelDraw(object, mStackGet(&stack));*/
+    /**/
+    /**/
+    /*// Reset*/
+    /*mStackClear(&stack);*/
 
     // Poll Events & Swap Buffers
     glfwPollEvents();

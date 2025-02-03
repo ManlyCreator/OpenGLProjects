@@ -20,10 +20,13 @@
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods);
+void lookAt(vec3 pos, vec3 target, mat4 lookAtMat);
 
-float cameraX = 0.0f, cameraY = 0.0f, cameraZ = 20.0f;
+float cameraX = -10.0f, cameraY = 10.0f, cameraZ = 20.0f;
 double currentTime;
 mat4 projection;
+
+// TODO: Learn OpenGL - Camera: Walk Around
 
 int main(void) {
   double timeFactor;
@@ -78,7 +81,11 @@ int main(void) {
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
   glfwSetKeyCallback(window, keyCallback);
-  
+
+  // Manual LookAt
+  lookAt((vec3){cameraX, cameraY, cameraZ}, (vec3){0.0f, 0.0f, 0.0f}, view);
+  glm_mat4_print(view, stdout);
+
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
     currentTime = glfwGetTime();
@@ -91,13 +98,11 @@ int main(void) {
     shaderSetFloat(shaderProgram, "currentTime", currentTime);
 
     // View
-    glm_mat4_identity(view);
-    glm_lookat((vec3){cameraX, cameraY, cameraZ}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, view);
     shaderSetMatrix4(shaderProgram, "view", view);
 
     // Model
     glm_mat4_identity(model);
-    glm_translate(model, (vec3){0.0f, 0.0f, 0.0f});
+    glm_translate(model, (vec3){1.0f, 1.0f, 1.0f});
     glm_rotate(model, glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
     glm_rotate(model, glm_rad(-10.0f), (vec3){0.0f, 0.0f, 1.0f});
     glm_scale(model, (vec3){1.0f, 1.0f, 1.0f});
@@ -123,4 +128,39 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
 void keyCallback(GLFWwindow *window, int key, int scanCode, int action, int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
+}
+
+void lookAt(vec3 pos, vec3 target, mat4 lookAtMat) {
+  vec3 up = {0.0f, 1.0f, 0.0f};
+  vec3 negObjectDirection;
+  vec3 objectRight, objectUp;
+  mat4 transformMat;
+
+  // (Negative) Direction Vector
+  glm_vec3_sub(pos,  target, negObjectDirection);
+  glm_vec3_normalize(negObjectDirection);
+
+  // Right Vector
+  glm_vec3_cross(up, negObjectDirection, objectRight);
+  glm_vec3_normalize(objectRight);
+
+  // Up Vector
+  glm_vec3_cross(negObjectDirection, objectRight, objectUp);
+
+  // Rotation Matrix
+  mat4 rotationMat = {
+    {objectRight[0], objectUp[0], negObjectDirection[0], 0.0f},
+    {objectRight[1], objectUp[1], negObjectDirection[1], 0.0f},
+    {objectRight[2], objectUp[2], negObjectDirection[2], 0.0f},
+    {0.0f,           0.0f,        0.0f,         1.0f}
+  };
+
+  // Transformation Matrix
+  glm_mat4_identity(transformMat);
+  transformMat[3][0] = -pos[0];
+  transformMat[3][1] = -pos[1];
+  transformMat[3][2] = -pos[2];
+
+  // LookAt Matrix
+  glm_mat4_mul(rotationMat, transformMat, lookAtMat);
 }
