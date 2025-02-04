@@ -28,6 +28,7 @@ create_library(Cube cube.c Dependencies)
 create_library(Pyramid pyramid.c Dependencies)
 create_library(Torus torus.c Dependencies)
 create_library(Model model.c Dependencies)
+create_library(Camera camera.c Dependencies)
 
 # Include Directory
 include_directories(include/)
