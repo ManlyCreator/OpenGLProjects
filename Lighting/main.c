@@ -26,17 +26,18 @@ void lookAt(vec3 pos, vec3 target, vec3 up, mat4 lookAtMat);
 double currentTime;
 mat4 projection;
 
-int width, height;
-
-double lastX = 500, lastY = 500;
+double lastX, lastY;
 double deltaX, deltaY;
 
 Camera camera;
 
-// TODO: Fix camera not orienting to proper pitch & yaw on init (resolve lastX & lastY being set to incorrect values)
-// TODO: LearnOpenGL Camera Excercises
+// TODO: Add a color attribute to the Cube class for the "light"
+// TODO: Create a separate shader program to display light color
+// TODO: Render the light
+// TODO: LearnOpenGL - Basic Lighting
 
 int main(void) {
+  int width, height;
   double timeFactor;
   Shader shaderProgram;
   Texture saturn, saturnRing;
@@ -45,6 +46,8 @@ int main(void) {
   Torus torus;
   MStack stack = mStackInit();
   float *ambient = pearlAmbient();
+  vec3 torusColor = {1.0f, 0.5f, 0.31f};
+  vec3 lightColor = {1.0f, 1.0f, 1.0f};
   vec3 torusPositions[] = {
       { 0.0f,   0.0f,   0.0f}, 
       { 20.0f,  5.0f,  30.0f}, 
@@ -93,20 +96,21 @@ int main(void) {
     return -1;
   
   // Camera
-  camera = cameraInit((vec3){0.0f, 0.0f, 20.0f}, 0.0f, 0.0f);
+  camera = cameraInit((vec3){0.0f, 0.0f, 20.0f}, 0.0f, glm_rad(-90.0f));
 
   // Transformations
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 200.0f, projection);
 
-  torus = torusInit(50, 50, 2.0f, 1.0f, &shaderProgram, NULL);
+  torus = torusInit(50, 50, 2.0f, 1.0f, (vec3){1.0f, 0.5f, 0.31f}, &shaderProgram, NULL);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+  // Sets lastX & lastY to center of screen for proper delta calculation
+  glfwGetWindowSize(window, &width, &height);
+  lastX = (float)width / 2;
+  lastY = (float)height / 2;
   glfwSetCursorPosCallback(window, cursorPosCallback);
-
-  printf("Width: %d\n", width);
-  printf("Height: %d\n", height);
 
   // Render Loop
   while (!glfwWindowShouldClose(window)) {
@@ -128,11 +132,12 @@ int main(void) {
     shaderSetMatrix4(shaderProgram, "view", camera.view);
 
     // Model
+    shaderSetVector3f(shaderProgram, "lightColor", lightColor);
     for (int i = 0; i < 10; i++) {
       glm_mat4_identity(model);
       glm_translate(model, torusPositions[i]);
       glm_rotate(model, glm_rad(45.0f), (vec3){1.0f, 0.0f, 0.0f});
-      glm_rotate(model, glm_rad(-10.0f), (vec3){0.0f, 0.0f, 1.0f});
+      glm_rotate(model, glm_rad(-10.0f + i * 5.0f), (vec3){0.0f, 0.0f, 1.0f});
       glm_scale(model, (vec3){1.0f, 1.0f, 1.0f});
       shapeDraw(torus, model);
     }
@@ -148,12 +153,10 @@ int main(void) {
   return 0;
 }
 
-void framebufferSizeCallback(GLFWwindow *window, int newWidth, int newHeight) {
-  glViewport(0, 0, newWidth, newHeight);
+void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
   glm_mat4_identity(projection);
-  glm_perspective(glm_rad(45.0f), (float)newWidth / newHeight, 0.1f, 200.0f, projection);
-  width = newWidth;
-  height = newHeight;
+  glm_perspective(glm_rad(45.0f), (float)width / height, 0.1f, 200.0f, projection);
 }
 
 void cursorPosCallback(GLFWwindow *window, double x, double y) {

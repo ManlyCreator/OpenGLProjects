@@ -49,6 +49,8 @@ void shapeDraw(Shape shape, mat4 model) {
   // Transform
   shaderSetMatrix4(*shape.shader, "model", model);
 
+  shaderSetVector3f(*shape.shader, "objectColor", shape.color);
+
   // Vertices
   glBindBuffer(GL_ARRAY_BUFFER, shape.VBO[0]);
   glEnableVertexAttribArray(0);

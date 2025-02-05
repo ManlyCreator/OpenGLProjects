@@ -1,7 +1,7 @@
 #include "torus.h"
 #include "shape.h"
 
-Torus torusInit(int rings, int stacks, float insideRadius, float ringRadius, Shader *shader, Texture *texture) {
+Torus torusInit(int rings, int stacks, float insideRadius, float ringRadius, vec3 color, Shader *shader, Texture *texture) {
   Torus torus;
 
   float x, y, z;
@@ -72,6 +72,7 @@ Torus torusInit(int rings, int stacks, float insideRadius, float ringRadius, Sha
 
   shapeSetData(&torus);
 
+  glm_vec3_copy(color, torus.color);
   torus.shader = shader;
   torus.texture = texture;
 
