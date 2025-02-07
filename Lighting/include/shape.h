@@ -7,11 +7,13 @@
 
 #define PI GLM_PI
 
+typedef enum { VERTICES, TEXTURE, NORMALS } VBOAttribs;
+
 typedef struct {
   /*** OPENGL DATA ***/
   GLuint VAO;
   GLuint EBO;
-  GLuint VBO[4];
+  GLuint VBO[3];
   Shader *shader;
   Texture *texture;
   /*** VERTEX DATA ***/

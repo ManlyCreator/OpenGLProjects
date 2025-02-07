@@ -6,6 +6,7 @@ project(Lighting)
 
 # Project Settings
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_BUILD_TYPE Debug)
 
 # Compile Executable
 add_executable(${PROJECT_NAME} main.c)

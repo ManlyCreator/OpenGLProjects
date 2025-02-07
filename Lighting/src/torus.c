@@ -40,6 +40,10 @@ Torus torusInit(int rings, int stacks, float insideRadius, float ringRadius, vec
       ny = y * radiusInv; 
       nz = z * radiusInv; 
 
+      torus.normals[torus.numNormals++] = nx; 
+      torus.normals[torus.numNormals++] = ny; 
+      torus.normals[torus.numNormals++] = nz; 
+
       // Vertices
       x += insideRadius * cos(insideAngle);
       z += insideRadius * sin(insideAngle);

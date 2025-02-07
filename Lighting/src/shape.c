@@ -11,16 +11,16 @@ void shapeSetData(Shape *shape) {
   glGenBuffers(3, shape->VBO);
 
   // Vertices
-  glBindBuffer(GL_ARRAY_BUFFER, shape->VBO[0]);
+  glBindBuffer(GL_ARRAY_BUFFER, shape->VBO[VERTICES]);
   glBufferData(GL_ARRAY_BUFFER, shape->numVertices * sizeof(float), shape->vertices, GL_STATIC_DRAW);
   
   // Texture
-  glBindBuffer(GL_ARRAY_BUFFER, shape->VBO[1]);
+  glBindBuffer(GL_ARRAY_BUFFER, shape->VBO[TEXTURE]);
   glBufferData(GL_ARRAY_BUFFER, shape->numTextureCoords * sizeof(float), shape->textureCoordinates, GL_STATIC_DRAW);
 
   // Normals
   if (shape->numNormals) {
-    glBindBuffer(GL_ARRAY_BUFFER, shape->VBO[2]);
+    glBindBuffer(GL_ARRAY_BUFFER, shape->VBO[NORMALS]);
     glBufferData(GL_ARRAY_BUFFER, shape->numNormals * sizeof(float), shape->normals, GL_STATIC_DRAW);
   }
 
@@ -43,7 +43,6 @@ void shapeSetData(Shape *shape) {
 }
 
 void shapeDraw(Shape shape, mat4 model) {
-  shaderUse(*shape.shader);
   glBindVertexArray(shape.VAO);
 
   // Transform
@@ -52,20 +51,26 @@ void shapeDraw(Shape shape, mat4 model) {
   shaderSetVector3f(*shape.shader, "objectColor", shape.color);
 
   // Vertices
-  glBindBuffer(GL_ARRAY_BUFFER, shape.VBO[0]);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glBindBuffer(GL_ARRAY_BUFFER, shape.VBO[VERTICES]);
+  glEnableVertexAttribArray(VERTICES);
+  glVertexAttribPointer(VERTICES, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
   // Texture
-  glBindBuffer(GL_ARRAY_BUFFER, shape.VBO[1]);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+  glBindBuffer(GL_ARRAY_BUFFER, shape.VBO[TEXTURE]);
+  glEnableVertexAttribArray(TEXTURE);
+  glVertexAttribPointer(TEXTURE, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
 
   if (shape.texture) {
     shaderSetInt(*shape.shader, "textureFlag", 1);
     textureUse(*shape.texture);
   } else {
     shaderSetInt(*shape.shader, "textureFlag", 0);
+  }
+
+  if (shape.numNormals) {
+    glBindBuffer(GL_ARRAY_BUFFER, shape.VBO[NORMALS]);
+    glEnableVertexAttribArray(NORMALS);
+    glVertexAttribPointer(NORMALS, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   }
 
   // Draw

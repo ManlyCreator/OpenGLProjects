@@ -14,6 +14,7 @@
 #include "matrixStack.h"
 #include "torus.h"
 #include "shape.h"
+#include "cube.h"
 
 #define WIDTH 1000
 #define HEIGHT 1000
@@ -31,23 +32,22 @@ double deltaX, deltaY;
 
 Camera camera;
 
-// TODO: Add a color attribute to the Cube class for the "light"
-// TODO: Create a separate shader program to display light color
-// TODO: Render the light
-// TODO: LearnOpenGL - Basic Lighting
+// TODO: LearnOpenGL - Basic Lighting: One last thing
 
 int main(void) {
   int width, height;
   double timeFactor;
-  Shader shaderProgram;
+  Shader objectShader, lightShader;
   Texture saturn, saturnRing;
   mat4 view, model;
   GLFWwindow *window;
   Torus torus;
+  Cube lightSource;
   MStack stack = mStackInit();
   float *ambient = pearlAmbient();
-  vec3 torusColor = {1.0f, 0.5f, 0.31f};
+  vec3 lightPos = {-5.0f, 10.0f, 0.0f};
   vec3 lightColor = {1.0f, 1.0f, 1.0f};
+  vec3 torusColor = {1.0f, 0.5f, 0.31f};
   vec3 torusPositions[] = {
       { 0.0f,   0.0f,   0.0f}, 
       { 20.0f,  5.0f,  30.0f}, 
@@ -91,8 +91,10 @@ int main(void) {
     return -1;
   if (!(saturnRing = textureLoad("../textures/saturn_ring.jpg")))
     return -1;
-  // Shader
-  if (!shaderConstruct(&shaderProgram, "../vertexShader.glsl", "../fragmentShader.glsl"))
+  // Shaders
+  if (!shaderConstruct(&objectShader, "../shaders/objectVertexShader.glsl", "../shaders/objectFragmentShader.glsl"))
+    return -1;
+  if (!shaderConstruct(&lightShader, "../shaders/lightCubeVertexShader.glsl", "../shaders/lightCubeFragmentShader.glsl"))
     return -1;
   
   // Camera
@@ -102,7 +104,8 @@ int main(void) {
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), (float)WIDTH / HEIGHT, 0.1f, 200.0f, projection);
 
-  torus = torusInit(50, 50, 2.0f, 1.0f, (vec3){1.0f, 0.5f, 0.31f}, &shaderProgram, NULL);
+  torus = torusInit(50, 50, 2.0f, 1.0f, torusColor, &objectShader, NULL);
+  lightSource = cubeInit(lightColor, &lightShader, NULL);
 
   // Callbacks
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -124,15 +127,14 @@ int main(void) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shaderSetMatrix4(shaderProgram, "projection", projection);
-    shaderSetFloat(shaderProgram, "currentTime", currentTime);
 
-    // View
+    // Object Shader
+    shaderUse(objectShader);
+    shaderSetMatrix4(objectShader, "projection", projection);
     cameraUpdateView(&camera);
-    shaderSetMatrix4(shaderProgram, "view", camera.view);
-
-    // Model
-    shaderSetVector3f(shaderProgram, "lightColor", lightColor);
+    shaderSetMatrix4(objectShader, "view", camera.view);
+    shaderSetVector3f(objectShader, "lightColor", lightColor);
+    shaderSetVector3f(objectShader, "lightPos", lightPos);
     for (int i = 0; i < 10; i++) {
       glm_mat4_identity(model);
       glm_translate(model, torusPositions[i]);
@@ -141,6 +143,15 @@ int main(void) {
       glm_scale(model, (vec3){1.0f, 1.0f, 1.0f});
       shapeDraw(torus, model);
     }
+
+    // Light Cube Shader
+    shaderUse(lightShader);
+    shaderSetMatrix4(lightShader, "projection", projection);
+    shaderSetMatrix4(lightShader, "view", camera.view);
+    glm_mat4_identity(model);
+    glm_translate(model, lightPos);
+    shapeDraw(lightSource, model);
+
 
     // Poll Events & Swap Buffers
     glfwPollEvents();

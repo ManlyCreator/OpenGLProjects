@@ -5,6 +5,6 @@
 
 typedef Shape Cube;
 
-Cube cubeInit(Shader *shader, Texture *texture);
+Cube cubeInit(vec3 color, Shader *shader, Texture *texture);
 
 #endif
